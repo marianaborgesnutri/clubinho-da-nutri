@@ -11,7 +11,7 @@ const CABELO = {
   preto: 0x1E1A19, castanho_escuro: 0x3B2A22, castanho: 0x6A4632, castanho_claro: 0x9A6E4C,
   loiro: 0xD8B56A, loiro_claro: 0xEAD39A, ruivo: 0xA8482C, grisalho: 0xB9B4AE, rosa: 0xE59AB0
 };
-const TILE = 5.2;
+let TILE = 5.2; // no celular em pé fica menor (robôs maiores na tela)
 const POS_HAB = { alimentacao: [-0.95, 0.95], agua: [0.95, 0.95], exercicio: [-0.95, -0.95], fruta: [0.95, -0.95] };
 
 const matCache = new Map();
@@ -168,6 +168,16 @@ function robo(r) {
   return R;
 }
 
+// o próprio robô brilha: quanto mais hábitos, mais forte
+function brilhar(R, n) {
+  const mats = [];
+  R.traverse(o => {
+    if (!o.isMesh || !o.material || !o.material.color || o.material.map || !o.material.emissive || o.material.emissive.getHex() !== 0) return;
+    o.material = o.material.clone(); o.material.emissive.copy(o.material.color).lerp(new THREE.Color(0xFFE6B0), .35); mats.push(o.material);
+  });
+  return { mats, k: .1 + n * .11 };
+}
+
 // ---------- robô da Mari (anfitriã) ----------
 function estrela(r1, r2, n = 5) {
   const sh = new THREE.Shape();
@@ -208,8 +218,6 @@ function palco() {
   const base = new THREE.Mesh(new THREE.CylinderGeometry(1.7, 1.85, .22, 48), mat(0xD7B5AB)); base.position.y = .11; g.add(base);
   const topo = new THREE.Mesh(new THREE.CylinderGeometry(1.55, 1.55, .04, 48), mat(0xF3E3DC)); topo.position.y = .24; g.add(topo);
   const aro = new THREE.Mesh(new THREE.TorusGeometry(1.72, .05, 8, 64), mat(0xE2B65A, { metalness: .7, roughness: .3 })); aro.rotation.x = Math.PI / 2; aro.position.y = .22; g.add(aro);
-  const hs = new THREE.Sprite(new THREE.SpriteMaterial({ map: halo, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: .55 }));
-  hs.scale.setScalar(4.2); hs.position.y = 1.6; g.add(hs);
   return g;
 }
 
@@ -295,13 +303,15 @@ function montarSala(cols, rows) {
     g.fillStyle = '#fff'; g.font = '800 92px Montserrat, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('CLUBINHO DA NUTRI', w / 2, h / 2 - 18);
     g.fillStyle = '#D7B5AB'; g.font = '700 46px Montserrat, sans-serif'; g.fillText('Desafio 21 dias', w / 2, h / 2 + 58);
   });
-  const pw = Math.min(W * .6, 9);
+  // placa e calendário na parede da esquerda (longe das etiquetas dos robôs do fundo)
+  const cw = 2.6, ch = cw * 640 / 512;
+  const pw = Math.max(3, Math.min(D - cw - 3.2, 9));
+  const zPl = -D / 2 + 1.4 + pw / 2;
   const pl = new THREE.Mesh(new THREE.PlaneGeometry(pw, pw * 220 / 1024), new THREE.MeshBasicMaterial({ map: placa, transparent: true }));
-  pl.position.set(0, 2.7, -D / 2 + .02); room.add(pl);
-  // calendário na parede: dia de hoje e em que dia do desafio estamos
-  { const cal = calendario(); const cw = 2.6, ch = cw * 640 / 512;
+  pl.rotation.y = Math.PI / 2; pl.position.set(-W / 2 + .02, 2.7, zPl); room.add(pl);
+  { const cal = calendario();
     const cm = new THREE.Mesh(new THREE.PlaneGeometry(cw, ch), new THREE.MeshBasicMaterial({ map: cal, transparent: true }));
-    cm.position.set(-Math.min(pw / 2 + cw / 2 + .4, W / 2 - cw / 2 - .3), 2.15, -D / 2 + .03); room.add(cm); }
+    cm.rotation.y = Math.PI / 2; cm.position.set(-W / 2 + .03, 2.15, Math.min(zPl + pw / 2 + .6 + cw / 2, D / 2 - cw / 2 - .3)); room.add(cm); }
   // luzinhas
   S.luzes = [];
   const cores = [0xE3C27A, 0xE58FA3, 0x9FE3C2];
@@ -323,7 +333,7 @@ function colunas() {
   const w = S.container.clientWidth, h = S.container.clientHeight || 1;
   const n = S.dados ? S.dados.length : 30;
   const a = w / h;
-  let c = a < .6 ? 3 : a < .85 ? 4 : a < 1.25 ? 6 : a < 1.7 ? 7 : 8;
+  let c = a < .85 ? 4 : a < 1.25 ? 6 : a < 1.7 ? 7 : 8;
   return Math.min(c, Math.max(2, Math.ceil(Math.sqrt(n * a))));
 }
 
@@ -331,7 +341,7 @@ function enquadrar() {
   const { cam, ctl } = S;
   ctl.target.set(0, .6, .3);
   const asp = S.container.clientWidth / Math.max(1, S.container.clientHeight);
-  const dir = (asp < .85 ? new THREE.Vector3(.1, 1.75, 1) : new THREE.Vector3(.28, 1.2, 1)).normalize();
+  const dir = (asp < .85 ? new THREE.Vector3(.12, 2.3, 1) : new THREE.Vector3(.28, 1.2, 1)).normalize();
   const cantos = [];
   for (const x of [-S.W / 2, S.W / 2]) for (const z of [-S.D / 2, S.D / 2]) for (const y of [0, 1.8]) cantos.push(new THREE.Vector3(x * .96, y, z * .96));
   let lo = 4, hi = 300;
@@ -367,6 +377,7 @@ function redimensionar() {
 function posicionar() {
   const n = S.dados.length; const cols = S.cols; const rows = n ? Math.ceil(n / cols) : 0;
   const rt = rows + 1; // +1 fileira na frente para o palco da Mari
+  TILE = S.container.clientWidth < 600 && S.container.clientHeight > S.container.clientWidth ? 4.3 : 5.2;
   montarSala(cols, rt);
   S.bots.forEach((b, i) => {
     let cx = (i % cols - (cols - 1) / 2) * TILE, cz = (Math.floor(i / cols) - (rt - 1) / 2) * TILE;
@@ -401,10 +412,6 @@ function atualizar(sala, aquecendo) {
     rug.rotation.x = -Math.PI / 2; tile.add(rug);
     const its = {};
     habs.forEach(h => { const it = item(h); it.position.set(POS_HAB[h][0], .02, POS_HAB[h][1]); tile.add(it); its[h] = it; });
-    if (habs.length) {
-      const hs = new THREE.Sprite(new THREE.SpriteMaterial({ map: halo, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: .25 + habs.length * .17 }));
-      hs.scale.setScalar(1.6 + habs.length * .5); hs.position.y = 1.2; tile.add(hs);
-    }
     const extra = [];
     if (estado === 'dormindo') { for (let k = 0; k < 4; k++) { const z = textoSprite('Z', '#55675B', 128); z.scale.setScalar(.5); g.add(z); extra.push(z); } }
     if (habs.length === 4) { for (let k = 0; k < 3; k++) { const z = textoSprite('✦', '#F0C35A'); z.scale.setScalar(.4); g.add(z); extra.push(z); } }
@@ -413,10 +420,11 @@ function atualizar(sala, aquecendo) {
     if (estado === 'aquecendo') P.band.visible = true;
     if (estado === 'dormindo') { const rg = R.userData.rig; rg.rotation.x = -Math.PI / 2; rg.position.set(0, .34, -.8); R.rotation.y = (Math.random() - .5) * 1.2; P.armL.rotation.z = -.5; P.armR.rotation.z = .5; P.eyes.forEach(e => e.scale.set(1.3, .18, .6)); R.traverse(o => { if (o.isMesh && o.material && o.material.color && !o.material.map) { o.material = o.material.clone(); o.material.color.lerp(new THREE.Color(0x9AA39D), .35); } }); }
     if (habs.length === 4) R.traverse(o => { if (o === P.body.parent) return; });
+    const glow = estado === 'ativo' ? brilhar(R, habs.length) : null;
     const label = document.createElement('div'); label.className = 's3-nome' + (estado === 'dormindo' ? ' dorm' : '');
     label.innerHTML = '<b></b><span></span>'; const pt = s.nome.trim().split(/\s+/); const curto = pt[0]; label.querySelector('b').textContent = curto; label.dataset.curto = curto; label.dataset.full = s.nome;
     S.labels.append(label);
-    S.bots.push({ g, R, P, tile, label, estado, habs, its, extra, nome: s.nome, base: new THREE.Vector3(), cur: new THREE.Vector2(), alvo: new THREE.Vector2(),
+    S.bots.push({ g, R, P, tile, label, estado, habs, its, extra, glow, nome: s.nome, base: new THREE.Vector3(), cur: new THREE.Vector2(), alvo: new THREE.Vector2(),
       fase: Math.random() * 6, idx: Math.floor(Math.random() * Math.max(1, habs.length)), t: Math.random() * 2, modo: 'acao', propAtual: null });
   });
   // robô da Mari, sempre na sala, no palco da frente
@@ -429,7 +437,7 @@ function atualizar(sala, aquecendo) {
     const label = document.createElement('div'); label.className = 's3-nome mari';
     label.innerHTML = '<b></b><span></span>'; label.querySelector('b').textContent = 'Mari Nutri 💚'; label.dataset.curto = 'Mari Nutri 💚'; label.dataset.full = 'Mari Nutri 💚';
     S.labels.append(label);
-    S.bots.push({ g, R, P: R.userData.parts, tile, label, estado: 'ativo', mari: true, habs: habsM, its: itsM, extra, nome: 'Mari Nutri', base: new THREE.Vector3(), cur: new THREE.Vector2(), alvo: new THREE.Vector2(),
+    S.bots.push({ g, R, P: R.userData.parts, tile, label, estado: 'ativo', mari: true, habs: habsM, its: itsM, extra, glow: brilhar(R, 4), nome: 'Mari Nutri', base: new THREE.Vector3(), cur: new THREE.Vector2(), alvo: new THREE.Vector2(),
       fase: 0, idx: 0, t: 0, modo: 'acao', propAtual: null });
   }
   S.cols = colunas();
@@ -458,6 +466,7 @@ function loop() {
     // reset suave
     const lerp = (o, k, val, s = 8) => { o[k] += (val - o[k]) * Math.min(1, dt * s); };
     if (P.estrela) P.estrela.rotation.y = b.fase * 1.8;
+    if (b.glow) { const k = b.glow.k * (.78 + .22 * Math.sin(b.fase * 2.4)); b.glow.mats.forEach(m => { m.emissiveIntensity = k; }); }
     if (b.mari && b.fase % 16 < 3.2) {
       // Mari cumprimenta a turma de tempos em tempos (e depois volta às atividades)
       if (b.propAtual) setProp(b, null);
@@ -558,10 +567,18 @@ function focar(nome) {
   if (!b) return false;
   b.label.classList.add('foco');
   window.dispatchEvent(new CustomEvent('sala3d-foco', { detail: { nome: b.nome, estado: b.estado, habs: b.habs.slice(), mari: !!b.mari } }));
-  // a ficha abre embaixo (à esquerda no PC): o robô fica na parte de cima da tela, sem ficar atrás dela
-  const larga = S.container.clientWidth > 700;
-  const t = new THREE.Vector3(b.base.x - (larga ? 1.6 : 0), 1, b.base.z + (larga ? 2.2 : 3.2));
-  irPara(t, t.clone().add(new THREE.Vector3(3, 7.5, 9)));
+  // enquadra o robô longe da ficha: no celular em pé a ficha fica embaixo (robô em cima);
+  // no celular deitado ela fica à esquerda (robô à direita); no PC, embaixo à esquerda
+  const W = S.container.clientWidth, H = S.container.clientHeight;
+  const empe = W < 600 && H > W, deitado = !empe && H < 480;
+  const off = empe ? new THREE.Vector3(0, 14.5, 10.5) : deitado ? new THREE.Vector3(2.5, 9.5, 12.5) : new THREE.Vector3(3, 7.5, 9);
+  const nx = empe ? 0 : deitado ? .4 : .2, ny = empe ? .22 : deitado ? -.05 : .2;
+  const alvo = new THREE.Vector3(b.base.x, 1.1, b.base.z), camPos = alvo.clone().add(off);
+  const m = new THREE.Matrix4().lookAt(camPos, alvo, new THREE.Vector3(0, 1, 0));
+  const right = new THREE.Vector3().setFromMatrixColumn(m, 0), up = new THREE.Vector3().setFromMatrixColumn(m, 1);
+  const hh = Math.tan(THREE.MathUtils.degToRad(S.cam.fov / 2)) * off.length(), hw = hh * (W / Math.max(1, H));
+  const shift = right.multiplyScalar(-nx * hw).add(up.multiplyScalar(-ny * hh));
+  irPara(alvo.add(shift), camPos.add(shift));
   return true;
 }
 function tocar(e) {
