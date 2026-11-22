@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#55675B">
+<meta name="color-scheme" content="light only">
 <title>Clubinho da Nutri | Desafio 21 dias</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -80,7 +81,10 @@
   .sala-topo{display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap}
   .sala-topo .busca{margin-left:auto;width:170px;padding:8px 12px;font-size:14px}
   .legenda{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 0}
-  .legenda span{background:var(--creme);border-radius:99px;padding:4px 10px;font-size:11.5px;font-weight:600;color:var(--verde-esc)}
+  .legenda span{background:var(--creme);border-radius:99px;padding:4px 10px;font-size:11.5px;font-weight:600;color:var(--verde-esc);position:relative;cursor:help;user-select:none}
+  .legenda span:hover,.legenda span.aberta{background:#DDE6DF}
+  .dica-bolha{position:fixed;z-index:200;max-width:260px;background:var(--verde-esc);color:#fff;font-size:12.5px;font-weight:600;line-height:1.35;padding:9px 12px;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,.22);pointer-events:none}
+  .logo-h{width:26px;height:26px;border-radius:50%;background:var(--verde);padding:2px;vertical-align:-6px;margin-right:2px;object-fit:contain}
   .sala{margin-top:12px;border-radius:20px;overflow:hidden;position:relative;
     background:linear-gradient(#E9E1DA 0,#E9E1DA 64px,transparent 64px),
       repeating-linear-gradient(90deg,#C9A27E 0 46px,#BF9673 46px 48px),#C9A27E}
@@ -116,6 +120,14 @@
   .s3-info .tot{margin-top:8px;font-size:12.5px;font-weight:700;color:var(--verde-esc)}
   .s3-info .x{position:absolute;right:8px;top:8px;border:0;background:var(--creme);width:28px;height:28px;border-radius:50%;font-size:15px;color:var(--verde-esc);cursor:pointer}
   @media (max-width:600px){.s3-info{bottom:62px}}
+  @media (orientation:landscape) and (max-height:500px){
+    .sala3d{height:calc(100vh - 24px)!important;min-height:260px!important}
+    .s3-info{top:10px;bottom:auto;max-height:calc(100% - 20px);overflow:auto;width:250px;padding:10px 12px}
+    .s3-info ul{grid-template-columns:1fr;gap:4px}.s3-info li{padding:5px 8px;font-size:12px}
+  }
+  .msg .quem .selo{display:inline-block;margin-left:5px;background:var(--verde);color:#fff;font-size:9.5px;padding:1px 6px;border-radius:8px;vertical-align:1px}
+  .msg.nutri{border:1.5px solid var(--verde)}
+  .card{border:2px solid var(--verde)}
   .sala3d canvas{display:block;width:100%!important;height:100%!important}
   .s3-labels{position:absolute;inset:0;pointer-events:none;overflow:hidden}
   .s3-nome{position:absolute;left:0;top:0;display:flex;flex-direction:column;align-items:center;gap:1px;white-space:nowrap;will-change:transform}
@@ -192,13 +204,13 @@
   <section class="card a-sala">
     <div class="sala-topo">
       <div>
-        <h2>🤖 Sala do Clubinho</h2>
+        <h2><img class="logo logo-h" alt=""> Sala do Clubinho</h2>
         <div class="sub" id="salaSub"></div>
       </div>
       <input type="search" class="busca" id="busca" name="achar-robo" autocomplete="off" placeholder="Achar meu robô 🔎">
     </div>
     <div class="legenda">
-      <span>🥗 Alimentação</span><span>🏋️‍♀️ Exercício</span><span>💧 Água</span><span>🍎 Fruta</span><span>✨ Brilha mais quem fez mais</span><span>😴 Dormindo</span>
+      <span tabindex="0" data-dica="Postou a foto de uma refeição seguindo o plano alimentar. A foto vale pelo dia todo.">🥗 Alimentação</span><span tabindex="0" data-dica="Fez pelo menos 30 minutos de atividade física e postou foto ou print do relógio.">🏋️‍♀️ Exercício</span><span tabindex="0" data-dica="Bateu a meta de água do dia: a meta que a nutri passou ou pelo menos 35 ml por kg.">💧 Água</span><span tabindex="0" data-dica="Comeu fruta no dia e postou o registro.">🍎 Fruta</span><span tabindex="0" data-dica="Quanto mais hábitos a pessoa fez no dia, mais o robô dela brilha. Quem fez os 4 ganha estrelinhas douradas em volta.">✨ Brilha mais quem fez mais</span><span tabindex="0" data-dica="Robô deitado no chão com Zzz: não registrou nenhum hábito nesse dia.">😴 Dormindo</span>
     </div>
     <div class="vis-sala hidden" id="visSala">
       <button data-v="ativas" class="on">🏃‍♀️ Em atividade <i id="nAtivas"></i></button>
@@ -262,7 +274,7 @@
 <script src="comum.js?v=4"></script>
 <script src="robo.js?v=4"></script>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
-<script type="module" src="sala3d.js?v=9"></script>
+<script type="module" src="sala3d.js?v=10"></script>
 <script>
 (function(){
   const C = CLUBE, sb = C.sb, el = C.el;
@@ -364,6 +376,24 @@
   }
 
   let s3ok = false, s3chave = '';
+  // explicação dos itens da legenda (passar o mouse no PC, tocar no celular)
+  (function () {
+    let bolha = null, dono = null;
+    const fechar = () => { if (bolha) bolha.remove(); bolha = null; if (dono) dono.classList.remove('aberta'); dono = null; };
+    const abrir = sp => {
+      fechar(); dono = sp; sp.classList.add('aberta');
+      bolha = document.createElement('div'); bolha.className = 'dica-bolha'; bolha.textContent = sp.dataset.dica; document.body.append(bolha);
+      const r = sp.getBoundingClientRect(), bw = bolha.offsetWidth;
+      bolha.style.left = Math.max(8, Math.min(r.left, innerWidth - bw - 8)) + 'px';
+      bolha.style.top = (r.bottom + 8) + 'px';
+    };
+    document.querySelectorAll('.legenda span[data-dica]').forEach(sp => {
+      sp.addEventListener('mouseenter', e => { if (matchMedia('(hover:hover)').matches) abrir(sp); });
+      sp.addEventListener('mouseleave', () => { if (matchMedia('(hover:hover)').matches) fechar(); });
+      sp.addEventListener('click', e => { e.stopPropagation(); if (dono === sp) fechar(); else abrir(sp); });
+    });
+    document.addEventListener('click', fechar); addEventListener('scroll', fechar, true);
+  })();
   // chat maior no computador
   (function () {
     const bt = document.getElementById('chatTam');
@@ -498,8 +528,9 @@
   function addMsg(m) {
     if (msgsEl.querySelector('[data-id="' + m.id + '"]')) return;
     const eu = meuNome && m.nome.trim().toLowerCase() === meuNome.trim().toLowerCase();
-    const d = el('div', 'msg' + (eu ? ' eu' : '')); d.dataset.id = m.id;
-    d.append(el('div', 'quem', m.nome));
+    const nutri = m.nome.trim().toLowerCase() === 'mari nutri';
+    const d = el('div', 'msg' + (eu ? ' eu' : '') + (nutri ? ' nutri' : '')); d.dataset.id = m.id;
+    const q = el('div', 'quem', m.nome); if (nutri) q.append(el('span', 'selo', '💚 nutri')); d.append(q);
     if (m.foto) { const img = el('img'); img.src = m.foto; img.alt = 'Foto de ' + m.nome; img.loading = 'lazy'; img.onclick = () => abrirFoto(m.foto); d.append(img); }
     if (m.texto) d.append(el('div', 'tx', m.texto));
     d.append(el('div', 'hr', hora(m.em)));
@@ -551,6 +582,7 @@
   document.getElementById('salvarNome').onclick = () => {
     const v = document.getElementById('meuNome').value.trim().replace(/\s+/g, ' ');
     if (v.split(' ').length < 2) { C.toast('Coloque nome e sobrenome 😊'); return; }
+    if (/^mari\s*nutri/i.test(v) && !souAdmin) { C.toast('Esse nome é só da nutri 😉 Use o seu nome e sobrenome'); return; }
     meuNome = v; LS.set('clube_nome', v); iniciarChat();
   };
 
@@ -600,6 +632,7 @@
   (async () => {
     if (sb) {
       try { const { data: s } = await sb.auth.getSession(); if (s && s.session) { const { data } = await sb.rpc('is_admin'); souAdmin = !!data; } } catch (e) { }
+      if (souAdmin) { meuNome = 'Mari Nutri'; LS.set('clube_nome', meuNome); }
     }
     iniciarChat();
   })();
