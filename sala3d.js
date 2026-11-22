@@ -218,6 +218,8 @@ function palco() {
   const base = new THREE.Mesh(new THREE.CylinderGeometry(1.7, 1.85, .22, 48), mat(0xD7B5AB)); base.position.y = .11; g.add(base);
   const topo = new THREE.Mesh(new THREE.CylinderGeometry(1.55, 1.55, .04, 48), mat(0xF3E3DC)); topo.position.y = .24; g.add(topo);
   const aro = new THREE.Mesh(new THREE.TorusGeometry(1.72, .05, 8, 64), mat(0xE2B65A, { metalness: .7, roughness: .3 })); aro.rotation.x = Math.PI / 2; aro.position.y = .22; g.add(aro);
+  const hs = new THREE.Sprite(new THREE.SpriteMaterial({ map: halo, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: .55 }));
+  hs.scale.setScalar(4.2); hs.position.y = 1.6; g.add(hs);
   return g;
 }
 
@@ -412,6 +414,10 @@ function atualizar(sala, aquecendo) {
     rug.rotation.x = -Math.PI / 2; tile.add(rug);
     const its = {};
     habs.forEach(h => { const it = item(h); it.position.set(POS_HAB[h][0], .02, POS_HAB[h][1]); tile.add(it); its[h] = it; });
+    if (habs.length) {
+      const hs = new THREE.Sprite(new THREE.SpriteMaterial({ map: halo, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: .25 + habs.length * .17 }));
+      hs.scale.setScalar(1.6 + habs.length * .5); hs.position.y = 1.2; tile.add(hs);
+    }
     const extra = [];
     if (estado === 'dormindo') { for (let k = 0; k < 4; k++) { const z = textoSprite('Z', '#55675B', 128); z.scale.setScalar(.5); g.add(z); extra.push(z); } }
     if (habs.length === 4) { for (let k = 0; k < 3; k++) { const z = textoSprite('✦', '#F0C35A'); z.scale.setScalar(.4); g.add(z); extra.push(z); } }
@@ -420,7 +426,7 @@ function atualizar(sala, aquecendo) {
     if (estado === 'aquecendo') P.band.visible = true;
     if (estado === 'dormindo') { const rg = R.userData.rig; rg.rotation.x = -Math.PI / 2; rg.position.set(0, .34, -.8); R.rotation.y = (Math.random() - .5) * 1.2; P.armL.rotation.z = -.5; P.armR.rotation.z = .5; P.eyes.forEach(e => e.scale.set(1.3, .18, .6)); R.traverse(o => { if (o.isMesh && o.material && o.material.color && !o.material.map) { o.material = o.material.clone(); o.material.color.lerp(new THREE.Color(0x9AA39D), .35); } }); }
     if (habs.length === 4) R.traverse(o => { if (o === P.body.parent) return; });
-    const glow = estado === 'ativo' ? brilhar(R, habs.length) : null;
+    const glow = null; // brilho fica na luz em volta do robô
     const label = document.createElement('div'); label.className = 's3-nome' + (estado === 'dormindo' ? ' dorm' : '');
     label.innerHTML = '<b></b><span></span>'; const pt = s.nome.trim().split(/\s+/); const curto = pt[0]; label.querySelector('b').textContent = curto; label.dataset.curto = curto; label.dataset.full = s.nome;
     S.labels.append(label);
@@ -437,7 +443,7 @@ function atualizar(sala, aquecendo) {
     const label = document.createElement('div'); label.className = 's3-nome mari';
     label.innerHTML = '<b></b><span></span>'; label.querySelector('b').textContent = 'Mari Nutri 💚'; label.dataset.curto = 'Mari Nutri 💚'; label.dataset.full = 'Mari Nutri 💚';
     S.labels.append(label);
-    S.bots.push({ g, R, P: R.userData.parts, tile, label, estado: 'ativo', mari: true, habs: habsM, its: itsM, extra, glow: brilhar(R, 4), nome: 'Mari Nutri', base: new THREE.Vector3(), cur: new THREE.Vector2(), alvo: new THREE.Vector2(),
+    S.bots.push({ g, R, P: R.userData.parts, tile, label, estado: 'ativo', mari: true, habs: habsM, its: itsM, extra, glow: null, nome: 'Mari Nutri', base: new THREE.Vector3(), cur: new THREE.Vector2(), alvo: new THREE.Vector2(),
       fase: 0, idx: 0, t: 0, modo: 'acao', propAtual: null });
   }
   S.cols = colunas();
