@@ -134,6 +134,7 @@
         <label style="display:flex;align-items:center;gap:8px;font-weight:700;color:var(--verde-esc);cursor:pointer"><input type="checkbox" id="modoTeste" style="width:20px;height:20px"> 🧪 Modo teste</label>
         <span class="sub" style="flex:1;min-width:200px">Ligado: o site mostra na hora o último dia com pontos lançados (mesmo hoje ou amanhã). Desligue antes de mandar o link para as meninas.</span>
         <button class="btn perigo" id="btZerar">🗑 Zerar todos os pontos</button>
+        <button class="btn perigo" id="btZerarChat">💬 Zerar o chat</button>
       </div>
     </div>
     <p class="sub" style="margin:0 0 10px">Toque em <b>Grupo</b> (+1) ou <b>Insta</b> (+2). Tocou errado? Toque de novo no mesmo botão para desmarcar.</p>
@@ -278,6 +279,14 @@
     salvando(1); const { error } = await sb.rpc('admin_zerar_pontos'); salvando(-1);
     if (error) { C.toast('Não consegui zerar', 'erro'); return; }
     regs = new Map(); renderPontos(); C.toast('Pontos zerados ✓');
+  };
+  $('btZerarChat').onclick = async () => {
+    const b = $('btZerarChat');
+    if (!b.dataset.conf) { b.dataset.conf = '1'; b.textContent = 'Toque de novo para apagar TODAS as mensagens'; setTimeout(() => { delete b.dataset.conf; b.textContent = '💬 Zerar o chat'; }, 4000); return; }
+    delete b.dataset.conf; b.textContent = '💬 Zerar o chat';
+    salvando(1); const { data, error } = await sb.rpc('admin_zerar_chat'); salvando(-1);
+    if (error) { C.toast('Não consegui zerar o chat', 'erro'); return; }
+    C.toast('Chat zerado ✓ (' + (data || 0) + ' mensagens apagadas)');
   };
   $('ant').onclick = () => { if (dia > C.INICIO) { dia = C.addDias(dia, -1); renderPontos(); } };
   $('prox').onclick = () => { if (dia < C.FIM) { dia = C.addDias(dia, 1); renderPontos(); } };
