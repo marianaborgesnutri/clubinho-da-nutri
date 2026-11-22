@@ -11,7 +11,7 @@ const CABELO = {
   preto: 0x1E1A19, castanho_escuro: 0x3B2A22, castanho: 0x6A4632, castanho_claro: 0x9A6E4C,
   loiro: 0xD8B56A, loiro_claro: 0xEAD39A, ruivo: 0xA8482C, grisalho: 0xB9B4AE, rosa: 0xE59AB0
 };
-const TILE = 3.1;
+const TILE = 3.9;
 const POS_HAB = { alimentacao: [-0.95, 0.95], agua: [0.95, 0.95], exercicio: [-0.95, -0.95], fruta: [0.95, -0.95] };
 
 const matCache = new Map();
@@ -325,7 +325,7 @@ function atualizar(sala, aquecendo) {
     if (estado === 'dormindo') { P.eyes.forEach(e => e.scale.set(1.3, .18, .6)); R.traverse(o => { if (o.isMesh && o.material && o.material.color && !o.material.map) { o.material = o.material.clone(); o.material.color.lerp(new THREE.Color(0x9AA39D), .35); } }); }
     if (habs.length === 4) R.traverse(o => { if (o === P.body.parent) return; });
     const label = document.createElement('div'); label.className = 's3-nome' + (estado === 'dormindo' ? ' dorm' : '');
-    label.innerHTML = '<b></b><span></span>'; const pt = s.nome.trim().split(/\s+/); const curto = pt.length > 1 ? pt[0] + ' ' + pt[pt.length - 1][0] + '.' : pt[0]; label.querySelector('b').textContent = curto; label.dataset.curto = curto; label.dataset.full = s.nome;
+    label.innerHTML = '<b></b><span></span>'; const pt = s.nome.trim().split(/\s+/); const curto = pt[0]; label.querySelector('b').textContent = curto; label.dataset.curto = curto; label.dataset.full = s.nome;
     S.labels.append(label);
     S.bots.push({ g, R, P, tile, label, estado, habs, its, extra, nome: s.nome, base: new THREE.Vector3(), cur: new THREE.Vector2(), alvo: new THREE.Vector2(),
       fase: Math.random() * 6, idx: Math.floor(Math.random() * Math.max(1, habs.length)), t: Math.random() * 2, modo: 'acao', propAtual: null });
@@ -417,9 +417,9 @@ function loop() {
     if (vis) {
       b.label.style.transform = `translate(${((v.x + 1) / 2 * w).toFixed(1)}px,${((1 - v.y) / 2 * h).toFixed(1)}px) translate(-50%,-100%)`;
       const sp = b.label.querySelector('span');
-      const perto = S.cam.position.distanceTo(S.ctl.target) < (S.distHome || 30) * .62 || b.label.classList.contains('foco');
+      const perto = S.cam.position.distanceTo(S.ctl.target) < (S.distHome || 30) * .45 || b.label.classList.contains('foco');
       sp.style.display = perto ? '' : 'none';
-      const bt = b.label.firstChild, nn = perto ? b.label.dataset.full : b.label.dataset.curto; if (bt.textContent !== nn) bt.textContent = nn;
+      const bt = b.label.firstChild, nn = b.label.classList.contains('foco') ? b.label.dataset.full : b.label.dataset.curto; if (bt.textContent !== nn) bt.textContent = nn;
       const txt = b.estado === 'aquecendo' ? '🔥 aquecendo' : b.estado === 'dormindo' ? '😴 dormindo' : (b.modo === 'anda' ? '🚶‍♀️ indo…' : ACAO_IC[b.habs[b.idx]] + ' ' + ACAO_VERBO[b.habs[b.idx]]);
       if (sp.textContent !== txt) sp.textContent = txt;
     }
