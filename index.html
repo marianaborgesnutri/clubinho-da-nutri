@@ -11,8 +11,8 @@
 <style>
   body{background:var(--creme)}
   .topo{background:var(--verde);background-image:radial-gradient(circle at 10% -20%,#6C8173 0,transparent 55%),radial-gradient(circle at 100% 120%,#4A5B50 0,transparent 50%);
-    color:#fff;padding:calc(14px + env(safe-area-inset-top)) 16px 70px;border-radius:0 0 32px 32px}
-  .topo-in{max-width:1280px;margin:0 auto;display:flex;align-items:center;gap:14px}
+    color:#fff;padding:calc(14px + env(safe-area-inset-top)) 20px 18px;border-radius:0 0 28px 28px}
+  .topo-in{margin:0 auto;display:flex;align-items:center;gap:14px}
   .topo img{width:64px;height:64px;flex:none}
   .topo h1{margin:0;font-size:20px;font-weight:800;line-height:1.15}
   .topo .pill{display:inline-block;margin-top:5px;background:var(--rose);color:var(--verde-esc);font-weight:700;border-radius:999px;padding:4px 12px;font-size:12px}
@@ -21,11 +21,11 @@
   .barra{height:7px;background:rgba(255,255,255,.2);border-radius:99px;overflow:hidden;margin-top:6px;width:120px;margin-left:auto}
   .barra i{display:block;height:100%;background:var(--rose);border-radius:99px}
 
-  .grade{max-width:1280px;margin:-52px auto 0;padding:0 12px 100px;display:grid;gap:14px;
+  .grade{margin:16px auto 0;padding:0 16px 100px;display:grid;gap:16px;
     grid-template-columns:1fr;grid-template-areas:"podio" "sala" "top" }
   .a-podio{grid-area:podio}.a-sala{grid-area:sala}.a-top{grid-area:top}.a-chat{grid-area:chat}
   @media (min-width:1000px){
-    .grade{grid-template-columns:320px 1fr 320px;grid-template-areas:"chat podio top" "chat sala top";align-items:start}
+    .grade{grid-template-columns:330px minmax(0,1fr) 340px;grid-template-areas:"chat podio top" "chat sala top";align-items:start}
     .a-chat{position:sticky;top:12px}
   }
 
@@ -74,9 +74,9 @@
   @media (min-width:600px){.piso{grid-template-columns:repeat(auto-fill,minmax(112px,1fr))}.piso .bot .fig{width:94px}}
 
   /* sala 3D */
-  .sala3d{position:relative;margin-top:12px;height:min(72vh,640px);min-height:420px;border-radius:20px;overflow:hidden;
+  .sala3d{position:relative;margin-top:12px;height:72vh;min-height:440px;border-radius:20px;overflow:hidden;
     background:linear-gradient(#F3ECE6,#E8DDD4);touch-action:none}
-  @media (min-width:1000px){.sala3d{height:640px}}
+  @media (min-width:1000px){.sala3d{height:calc(100vh - 150px);min-height:620px}}
   @media (max-width:600px){.legenda span{font-size:10.5px;padding:3px 8px}.sala-topo .busca{width:100%;margin-left:0}.s3-dica{font-size:10px;right:10px;text-align:center}}
   .sala3d canvas{display:block;width:100%!important;height:100%!important}
   .s3-labels{position:absolute;inset:0;pointer-events:none;overflow:hidden}
@@ -360,7 +360,7 @@
     painel = data; render();
   }
   renderTopo(); carregar();
-  setInterval(() => { if (!document.hidden) { renderTopo(); carregar(); } }, 60000);
+  setInterval(() => { if (!document.hidden) { renderTopo(); carregar(); } }, 30000);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) carregar(); });
 
   // ===================== CHAT =====================
