@@ -11,7 +11,7 @@ const CABELO = {
   preto: 0x1E1A19, castanho_escuro: 0x3B2A22, castanho: 0x6A4632, castanho_claro: 0x9A6E4C,
   loiro: 0xD8B56A, loiro_claro: 0xEAD39A, ruivo: 0xA8482C, grisalho: 0xB9B4AE, rosa: 0xE59AB0
 };
-const TILE = 3.9;
+const TILE = 5.2;
 const POS_HAB = { alimentacao: [-0.95, 0.95], agua: [0.95, 0.95], exercicio: [-0.95, -0.95], fruta: [0.95, -0.95] };
 
 const matCache = new Map();
@@ -57,7 +57,7 @@ const sombra = texCanvas(64, 64, (g) => {
   const r = g.createRadialGradient(32, 32, 2, 32, 32, 32); r.addColorStop(0, 'rgba(0,0,0,.35)'); r.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = r; g.fillRect(0, 0, 64, 64);
 });
 function textoSprite(txt, cor = '#8DA394', px = 64) {
-  const t = texCanvas(px, px, (g) => { g.font = `800 ${px * .8}px Montserrat, sans-serif`; g.fillStyle = cor; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(txt, px / 2, px / 2 + 2); });
+  const t = texCanvas(px, px, (g) => { g.font = `900 ${px * .78}px Montserrat, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.lineJoin = 'round'; g.lineWidth = px * .14; g.strokeStyle = '#ffffff'; g.strokeText(txt, px / 2, px / 2 + 2); g.fillStyle = cor; g.fillText(txt, px / 2, px / 2 + 2); });
   return new THREE.Sprite(new THREE.SpriteMaterial({ map: t, transparent: true, depthWrite: false }));
 }
 
@@ -164,7 +164,7 @@ function robo(r) {
   const sh = new THREE.Mesh(new THREE.PlaneGeometry(1.3, 1.3), new THREE.MeshBasicMaterial({ map: sombra, transparent: true, depthWrite: false }));
   sh.rotation.x = -Math.PI / 2; sh.position.y = .02; R.add(sh);
   R.userData.parts = parts; R.userData.rig = rig;
-  R.scale.setScalar(.9);
+  R.scale.setScalar(1.2);
   return R;
 }
 
@@ -239,7 +239,7 @@ function colunas() {
   const w = S.container.clientWidth, h = S.container.clientHeight || 1;
   const n = S.dados ? S.dados.length : 30;
   const a = w / h;
-  let c = a < .7 ? 4 : a < .9 ? 5 : a < 1.25 ? 6 : a < 1.7 ? 7 : 8;
+  let c = a < .6 ? 3 : a < .85 ? 4 : a < 1.25 ? 6 : a < 1.7 ? 7 : 8;
   return Math.min(c, Math.max(2, Math.ceil(Math.sqrt(n * a))));
 }
 
@@ -247,14 +247,14 @@ function enquadrar() {
   const { cam, ctl } = S;
   ctl.target.set(0, .6, .3);
   const asp = S.container.clientWidth / Math.max(1, S.container.clientHeight);
-  const dir = (asp < .9 ? new THREE.Vector3(.18, 1.25, 1) : new THREE.Vector3(.62, .95, 1)).normalize();
+  const dir = (asp < .85 ? new THREE.Vector3(.1, 1.75, 1) : new THREE.Vector3(.55, 1.3, 1)).normalize();
   const cantos = [];
-  for (const x of [-S.W / 2, S.W / 2]) for (const z of [-S.D / 2, S.D / 2]) for (const y of [0, z < 0 ? 4.2 : 2.6]) cantos.push(new THREE.Vector3(x, y, z));
+  for (const x of [-S.W / 2, S.W / 2]) for (const z of [-S.D / 2, S.D / 2]) for (const y of [0, 1.8]) cantos.push(new THREE.Vector3(x * .96, y, z * .96));
   let lo = 4, hi = 300;
   for (let k = 0; k < 30; k++) {
     const mid = (lo + hi) / 2;
     cam.position.copy(ctl.target).addScaledVector(dir, mid); cam.lookAt(ctl.target); cam.updateMatrixWorld();
-    const ok = cantos.every(c => { const v = c.clone().project(cam); return Math.abs(v.x) < .96 && Math.abs(v.y) < .93; });
+    const ok = cantos.every(c => { const v = c.clone().project(cam); return Math.abs(v.x) < .98 && Math.abs(v.y) < .9; });
     if (ok) hi = mid; else lo = mid;
   }
   cam.position.copy(ctl.target).addScaledVector(dir, hi); cam.lookAt(ctl.target); cam.updateMatrixWorld();
@@ -302,7 +302,10 @@ function limparBots() {
 function atualizar(sala, aquecendo) {
   if (!S.ok) return;
   S.dados = sala; limparBots();
-  sala.forEach((s, i) => {
+  // quem dormiu vai para o fundo da sala; quem fez mais fica na frente
+  const ord = sala.map(s => ({ s, n: (s.hab || []).filter(h => POS_HAB[h]).length }));
+  if (!aquecendo) ord.sort((a, b) => a.n - b.n);
+  ord.forEach(({ s }, i) => {
     const habs = (s.hab || []).filter(h => POS_HAB[h]);
     const estado = aquecendo ? 'aquecendo' : habs.length ? 'ativo' : 'dormindo';
     const R = robo(s.robo);
@@ -317,12 +320,12 @@ function atualizar(sala, aquecendo) {
       hs.scale.setScalar(1.6 + habs.length * .5); hs.position.y = 1.2; tile.add(hs);
     }
     const extra = [];
-    if (estado === 'dormindo') { for (let k = 0; k < 3; k++) { const z = textoSprite('Z'); z.scale.setScalar(.35); g.add(z); extra.push(z); } }
+    if (estado === 'dormindo') { for (let k = 0; k < 4; k++) { const z = textoSprite('Z', '#55675B', 128); z.scale.setScalar(.5); g.add(z); extra.push(z); } }
     if (habs.length === 4) { for (let k = 0; k < 3; k++) { const z = textoSprite('✦', '#F0C35A'); z.scale.setScalar(.4); g.add(z); extra.push(z); } }
     S.scene.add(tile);
     const P = R.userData.parts;
     if (estado === 'aquecendo') P.band.visible = true;
-    if (estado === 'dormindo') { P.eyes.forEach(e => e.scale.set(1.3, .18, .6)); R.traverse(o => { if (o.isMesh && o.material && o.material.color && !o.material.map) { o.material = o.material.clone(); o.material.color.lerp(new THREE.Color(0x9AA39D), .35); } }); }
+    if (estado === 'dormindo') { const rg = R.userData.rig; rg.rotation.x = -Math.PI / 2; rg.position.set(0, .34, -.8); R.rotation.y = (Math.random() - .5) * 1.2; P.armL.rotation.z = -.5; P.armR.rotation.z = .5; P.eyes.forEach(e => e.scale.set(1.3, .18, .6)); R.traverse(o => { if (o.isMesh && o.material && o.material.color && !o.material.map) { o.material = o.material.clone(); o.material.color.lerp(new THREE.Color(0x9AA39D), .35); } }); }
     if (habs.length === 4) R.traverse(o => { if (o === P.body.parent) return; });
     const label = document.createElement('div'); label.className = 's3-nome' + (estado === 'dormindo' ? ' dorm' : '');
     label.innerHTML = '<b></b><span></span>'; const pt = s.nome.trim().split(/\s+/); const curto = pt[0]; label.querySelector('b').textContent = curto; label.dataset.curto = curto; label.dataset.full = s.nome;
@@ -362,10 +365,10 @@ function loop() {
       lerp(P.legL.rotation, 'z', -.25 * (f * .5 + .5), 20); lerp(P.legR.rotation, 'z', .25 * (f * .5 + .5), 20);
       lerp(R.rotation, 'y', Math.sin(b.fase * .5) * .4);
     } else if (b.estado === 'dormindo') {
-      lerp(P.head.rotation, 'z', .32 + Math.sin(b.fase * 1.2) * .05, 3); lerp(P.head.rotation, 'x', .25, 3);
-      lerp(P.armL.rotation, 'z', -.15); lerp(P.armR.rotation, 'z', .15);
-      R.position.y = -.05;
-      b.extra.forEach((z, k) => { const p = ((b.fase * .45 + k / 3) % 1); z.position.set(.35 + p * .5, 2.0 + p * 1.1, 0); z.material.opacity = Math.sin(p * Math.PI); z.scale.setScalar(.25 + p * .25); });
+      P.body.scale.y = 1 + Math.sin(b.fase * 1.7) * .05; P.head.rotation.z = .3;
+      R.position.y = 0;
+      const hx = Math.sin(R.rotation.y) * .75, hz = Math.cos(R.rotation.y) * .75;
+      b.extra.forEach((z, k) => { const p = ((b.fase * .4 + k / 4) % 1); z.position.set(hx + .15 + p * .7, .75 + p * 1.9, hz); z.material.opacity = Math.min(1, Math.sin(p * Math.PI) * 1.4); z.scale.setScalar(.35 + p * .55); });
     } else {
       // ativo: anda até a atividade e faz
       const habs = b.habs;
@@ -410,7 +413,7 @@ function loop() {
     if (b.estado !== 'dormindo') R.position.y = y;
     b.g.position.set(b.base.x + b.cur.x, 0, b.base.z + b.cur.y);
     // etiqueta
-    v.set(b.g.position.x, 2.75, b.g.position.z).project(S.cam);
+    v.set(b.g.position.x, b.estado === 'dormindo' ? 1.45 : 2.75, b.g.position.z).project(S.cam);
     const w = S.container.clientWidth, h = S.container.clientHeight;
     const vis = v.z < 1 && v.x > -1.1 && v.x < 1.1 && v.y > -1.1 && v.y < 1.1;
     b.label.style.display = vis ? '' : 'none';
