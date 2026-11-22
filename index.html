@@ -196,8 +196,8 @@
 
 <main class="grade">
   <section class="card a-podio">
-    <h2>🏅 Pódio do dia</h2>
-    <div class="sub" id="podioSub">As 3 que mais pontuaram no dia</div>
+    <h2>🏅 Pódio geral</h2>
+    <div class="sub" id="podioSub">As 3 primeiras no geral</div>
     <div id="podio"><div class="vazio">Carregando…</div></div>
   </section>
 
@@ -331,9 +331,9 @@
 
     // pódio
     const pod = document.getElementById('podio'); pod.replaceChildren();
-    document.getElementById('podioSub').textContent = ref ? 'As 3 que mais pontuaram em ' + C.semana(ref) + ', ' + C.ddmm(ref) : 'As 3 que mais pontuaram no dia';
+    document.getElementById('podioSub').textContent = ref ? 'As 3 primeiras no geral, pontos somados até ' + C.ddmm(ref) : 'As 3 primeiras no geral';
     if (!p.podio.length) {
-      pod.append(el('div', 'vazio', ref ? 'Ninguém pontuou nesse dia ainda.' : '🔥 Os robôs estão se aquecendo! O primeiro pódio aparece depois do primeiro dia de desafio.'));
+      pod.append(el('div', 'vazio', ref ? 'Ninguém pontuou ainda.' : '🔥 Os robôs estão se aquecendo! O pódio aparece depois do primeiro dia de desafio.'));
     } else {
       const box = el('div', 'podio');
       const ordem = [1, 0, 2];
@@ -487,7 +487,7 @@
     if (painel.ref) s += 'Pontos até ' + C.ddmm(painel.ref) + ' (dia ' + C.numDia(painel.ref) + ' de 21)\n';
     s += '\n';
     painel.top5.forEach((x, i) => { s += ['🥇', '🥈', '🥉', '4º', '5º'][i] + ' ' + x.nome + ': ' + x.pontos + ' pts' + (x.var != null ? ' ' + C.seta(x.var) : '') + '\n'; });
-    if (painel.podio.length) { s += '\n🏅 *Pódio do dia ' + C.ddmm(painel.ref) + '*\n'; painel.podio.forEach((x, i) => { s += ['🥇', '🥈', '🥉'][i] + ' ' + x.nome + ' (' + x.pontos + ' pts)\n'; }); }
+    if (painel.podio.length) { s += '\n🏅 *Pódio geral até ' + C.ddmm(painel.ref) + '*\n'; painel.podio.forEach((x, i) => { s += ['🥇', '🥈', '🥉'][i] + ' ' + x.nome + ' (' + x.pontos + ' pts)\n'; }); }
     s += '\nQuer saber a sua colocação? Me chama no privado 😉\nBora manter a constância! 💚\n' + location.href.split('#')[0];
     (await C.copiar(s)) ? C.toast('Copiado! É só colar no WhatsApp ✓') : C.toast('Não consegui copiar', 'erro');
   };
