@@ -25,8 +25,14 @@
     grid-template-columns:1fr;grid-template-areas:"podio" "sala" "top" }
   .a-podio{grid-area:podio}.a-sala{grid-area:sala}.a-top{grid-area:top}.a-chat{grid-area:chat}
   @media (min-width:1000px){
-    .grade{grid-template-columns:330px minmax(0,1fr) 360px;grid-template-areas:"chat podio top" "chat sala sala";align-items:start}
+    .grade{grid-template-columns:320px minmax(0,1fr) 330px;grid-template-areas:"chat sala podio" "chat sala top";grid-template-rows:auto 1fr;align-items:start}
     .a-chat{position:sticky;top:12px}
+    .a-sala{grid-row:1 / span 2;position:sticky;top:12px;display:flex;flex-direction:column;height:calc(100vh - 150px);min-height:480px}
+    .a-sala .sala3d{flex:1;height:auto!important;min-height:0!important}
+    .a-sala .legenda{margin-top:6px}.a-sala .legenda span{font-size:11px;padding:3px 9px}
+    .a-sala .vis-sala{margin-top:10px}
+    .a-podio .podio{min-height:130px}
+    .a-podio .degrau .mini{width:54px}
   }
 
   /* pódio */
@@ -76,7 +82,7 @@
   /* sala 3D */
   .sala3d{position:relative;margin-top:12px;height:82vh;min-height:520px;border-radius:20px;overflow:hidden;
     background:linear-gradient(#F3ECE6,#E8DDD4);touch-action:none}
-  @media (min-width:1000px){.sala3d{height:calc(100vh - 170px);min-height:600px}}
+
   @media (max-width:600px){.legenda span{font-size:10.5px;padding:3px 8px}.sala-topo .busca{width:100%;margin-left:0}.s3-dica{font-size:10px;right:10px;text-align:center}}
   .vis-sala{display:flex;gap:6px;margin-top:12px;background:var(--creme);padding:5px;border-radius:99px;width:max-content;max-width:100%}
   .vis-sala button{border:0;background:transparent;border-radius:99px;padding:8px 14px;font:inherit;font-size:13px;font-weight:700;color:var(--verde-esc);cursor:pointer;white-space:nowrap}
@@ -107,7 +113,7 @@
   /* chat */
   .chat-card{display:flex;flex-direction:column;height:min(78vh,720px);padding:0;overflow:hidden}
   .chat-cab{padding:14px 16px;border-bottom:1px solid var(--cinza);display:flex;align-items:center;gap:8px}
-  .chat-cab h2{margin:0;font-size:16px}
+  .chat-cab h2{margin:0;font-size:16px;white-space:nowrap}
   .chat-cab .fechar{margin-left:auto;border:0;background:var(--creme);width:34px;height:34px;border-radius:50%;font-size:18px;color:var(--verde-esc)}
   .msgs{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;background:#F8F4F1;-webkit-overflow-scrolling:touch}
   .msg{max-width:84%;background:#fff;border-radius:16px 16px 16px 4px;padding:8px 11px;box-shadow:0 1px 2px rgba(0,0,0,.06);align-self:flex-start;position:relative}
@@ -138,8 +144,8 @@
   .chat-cab .tam{display:none;margin-left:auto;border:0;background:var(--creme);border-radius:99px;padding:7px 12px;font:inherit;font-size:12px;font-weight:700;color:var(--verde-esc);cursor:pointer}
   @media (min-width:1000px){
     .chat-cab .tam{display:inline-block}
-    body.chat-grande .grade{grid-template-columns:minmax(460px,40%) minmax(0,1fr) 350px}
-    body.chat-grande .chat-card{height:calc(100vh - 40px)}
+    body.chat-grande .grade{grid-template-columns:minmax(440px,34%) minmax(0,1fr) 310px}
+    .chat-card{height:calc(100vh - 150px);min-height:480px}
     body.chat-grande .msgs{font-size:15px}
   }
   .lightbox{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:100;display:flex;align-items:center;justify-content:center;padding:16px}
@@ -206,7 +212,7 @@
 
   <section class="a-chat fechado" id="chatWrap">
     <div class="card chat-card">
-      <div class="chat-cab"><h2>💬 Chat do Clubinho</h2><button class="tam" id="chatTam">⤢ Aumentar chat</button><button class="fechar" id="fecharChat" aria-label="Fechar">×</button></div>
+      <div class="chat-cab"><h2>💬 Chat do Clubinho</h2><button class="tam" id="chatTam">⤢ Aumentar</button><button class="fechar" id="fecharChat" aria-label="Fechar">×</button></div>
       <div class="portao" id="portaoSenha">
         <div style="font-size:34px">🔒</div>
         <p>Digite a senha do Clubinho para entrar no chat</p>
@@ -239,7 +245,7 @@
 <script src="comum.js?v=4"></script>
 <script src="robo.js?v=4"></script>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
-<script type="module" src="sala3d.js?v=6"></script>
+<script type="module" src="sala3d.js?v=7"></script>
 <script>
 (function(){
   const C = CLUBE, sb = C.sb, el = C.el;
@@ -344,7 +350,7 @@
   // chat maior no computador
   (function () {
     const bt = document.getElementById('chatTam');
-    const aplicar = g => { document.body.classList.toggle('chat-grande', g); bt.textContent = g ? '⤡ Diminuir chat' : '⤢ Aumentar chat'; };
+    const aplicar = g => { document.body.classList.toggle('chat-grande', g); bt.textContent = g ? '⤡ Diminuir' : '⤢ Aumentar'; };
     let g = false; try { g = localStorage.getItem('clube_chat_grande') === '1'; } catch (e) {}
     aplicar(g);
     bt.onclick = () => { g = !g; aplicar(g); try { localStorage.setItem('clube_chat_grande', g ? '1' : '0'); } catch (e) {} };
