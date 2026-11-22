@@ -168,6 +168,51 @@ function robo(r) {
   return R;
 }
 
+// ---------- robô da Mari (anfitriã) ----------
+function estrela(r1, r2, n = 5) {
+  const sh = new THREE.Shape();
+  for (let i = 0; i <= n * 2; i++) { const a = i / (n * 2) * Math.PI * 2 + Math.PI / 2, r = i % 2 ? r2 : r1; const x = Math.cos(a) * r, y = Math.sin(a) * r; i ? sh.lineTo(x, y) : sh.moveTo(x, y); }
+  const g = new THREE.ExtrudeGeometry(sh, { depth: .05, bevelEnabled: true, bevelThickness: .02, bevelSize: .02, bevelSegments: 2 }); g.center(); return g;
+}
+function roboMari() {
+  const R = robo({ cor: 'rose', cabelo: 'ondulado', corCabelo: 'castanho_escuro', acessorio: 'brinco' });
+  const P = R.userData.parts, rig = R.userData.rig, head = P.head;
+  const ouro = mat(0xE2B65A, { metalness: .75, roughness: .25, emissive: 0x6B4A12, emissiveIntensity: .25 });
+  const verde = mat(0x55675B), salvia = mat(0x8DA394);
+  // cabelo mais volumoso e comprido
+  [[-.66, -.55], [.66, -.55], [-.6, -.9], [.6, -.9], [0, -.85]].forEach(([x, y]) => { const c = new THREE.Mesh(geo.ball, mat(0x3B2A22, { roughness: .8 })); c.scale.set(.2, .26, .24); c.position.set(x, y, x ? -.12 : -.42); head.add(c); });
+  // tiara dourada com pedrinhas
+  const tiara = new THREE.Mesh(new THREE.TorusGeometry(.5, .035, 8, 32, Math.PI), ouro); tiara.position.set(0, .48, .05); tiara.rotation.x = -.35; head.add(tiara);
+  [-.3, 0, .3].forEach((x, i) => { const g = new THREE.Mesh(geo.ball, mat(i === 1 ? 0x8DA394 : 0xF4B6C2, { roughness: .2, emissive: i === 1 ? 0x55675B : 0xE58FA3, emissiveIntensity: .3 })); g.scale.setScalar(i === 1 ? .09 : .06); g.position.set(x, .5 + (i === 1 ? .2 : .14), .12); head.add(g); });
+  // flor no cabelo
+  for (let i = 0; i < 6; i++) { const a = i / 6 * Math.PI * 2; const f = new THREE.Mesh(geo.ball, mat(0xF4B6C2)); f.scale.set(.08, .08, .04); f.position.set(.46 + Math.cos(a) * .1, .3 + Math.sin(a) * .1, .3); head.add(f); }
+  const mio = new THREE.Mesh(geo.ball, ouro); mio.scale.setScalar(.055); mio.position.set(.46, .3, .33); head.add(mio);
+  // antena vira estrela dourada
+  P.ant.visible = false;
+  const est = new THREE.Mesh(estrela(.2, .09), mat(0xF0C35A, { metalness: .5, roughness: .3, emissive: 0xF0C35A, emissiveIntensity: .5 })); est.position.set(0, .8, 0); head.add(est); P.estrela = est;
+  // faixa transversal verde com borda dourada
+  const faixa = new THREE.Group(); faixa.position.set(0, .85, 0); faixa.rotation.z = -.62; rig.add(faixa);
+  const fx = new THREE.Mesh(new THREE.BoxGeometry(.2, 1.1, .7), salvia); faixa.add(fx);
+  const fxb = new THREE.Mesh(new THREE.BoxGeometry(.24, 1.1, .66), ouro); fxb.scale.set(1, .98, .98); faixa.add(fxb); fx.scale.z = 1.04;
+  // broche dourado no lugar do coração
+  rig.children.forEach(o => { if (o.geometry === geo.heart) o.material = ouro; });
+  // saia em camadas
+  const saia = new THREE.Mesh(new THREE.CylinderGeometry(.4, .66, .26, 24, 1, true), mat(0x55675B, { side: THREE.DoubleSide })); saia.position.y = .44; rig.add(saia);
+  const babado = new THREE.Mesh(new THREE.TorusGeometry(.64, .04, 8, 32), ouro); babado.rotation.x = Math.PI / 2; babado.position.y = .32; rig.add(babado);
+  // mãozinhas douradas
+  [P.armL, P.armR].forEach(a => a.children.forEach(o => { if (o.geometry === geo.ball) o.material = salvia; }));
+  return R;
+}
+function palco() {
+  const g = new THREE.Group();
+  const base = new THREE.Mesh(new THREE.CylinderGeometry(1.7, 1.85, .22, 48), mat(0xD7B5AB)); base.position.y = .11; g.add(base);
+  const topo = new THREE.Mesh(new THREE.CylinderGeometry(1.55, 1.55, .04, 48), mat(0xF3E3DC)); topo.position.y = .24; g.add(topo);
+  const aro = new THREE.Mesh(new THREE.TorusGeometry(1.72, .05, 8, 64), mat(0xE2B65A, { metalness: .7, roughness: .3 })); aro.rotation.x = Math.PI / 2; aro.position.y = .22; g.add(aro);
+  const hs = new THREE.Sprite(new THREE.SpriteMaterial({ map: halo, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: .55 }));
+  hs.scale.setScalar(4.2); hs.position.y = 1.6; g.add(hs);
+  return g;
+}
+
 // ---------- cena ----------
 const S = { ok: false };
 function iniciar(container) {
@@ -281,10 +326,12 @@ function redimensionar() {
 }
 
 function posicionar() {
-  const n = S.dados.length; const cols = S.cols; const rows = Math.max(1, Math.ceil(n / cols));
-  montarSala(cols, rows);
+  const n = S.dados.length; const cols = S.cols; const rows = n ? Math.ceil(n / cols) : 0;
+  const rt = rows + 1; // +1 fileira na frente para o palco da Mari
+  montarSala(cols, rt);
   S.bots.forEach((b, i) => {
-    const cx = (i % cols - (cols - 1) / 2) * TILE, cz = (Math.floor(i / cols) - (rows - 1) / 2) * TILE;
+    let cx = (i % cols - (cols - 1) / 2) * TILE, cz = (Math.floor(i / cols) - (rt - 1) / 2) * TILE;
+    if (b.estado === 'mari') { cx = 0; cz = (rows - (rt - 1) / 2) * TILE; }
     b.base.set(cx, 0, cz); b.g.position.set(cx, 0, cz); b.cur.set(0, 0); b.alvo.set(0, 0);
     b.tile.position.set(cx, .015, cz);
   });
@@ -333,6 +380,17 @@ function atualizar(sala, aquecendo) {
     S.bots.push({ g, R, P, tile, label, estado, habs, its, extra, nome: s.nome, base: new THREE.Vector3(), cur: new THREE.Vector2(), alvo: new THREE.Vector2(),
       fase: Math.random() * 6, idx: Math.floor(Math.random() * Math.max(1, habs.length)), t: Math.random() * 2, modo: 'acao', propAtual: null });
   });
+  // robô da Mari, sempre na sala, no palco da frente
+  {
+    const R = roboMari(); const g = new THREE.Group(); const lift = new THREE.Group(); lift.position.y = .26; lift.add(R); g.add(lift); S.scene.add(g);
+    const tile = palco(); S.scene.add(tile);
+    const extra = []; for (let k = 0; k < 4; k++) { const z = textoSprite('✦', k % 2 ? '#E2B65A' : '#D7B5AB', 96); z.scale.setScalar(.45); g.add(z); extra.push(z); }
+    const label = document.createElement('div'); label.className = 's3-nome mari';
+    label.innerHTML = '<b></b><span></span>'; label.querySelector('b').textContent = 'Mari Nutri 💚'; label.dataset.curto = 'Mari Nutri 💚'; label.dataset.full = 'Mari Nutri 💚';
+    S.labels.append(label);
+    S.bots.push({ g, R, P: R.userData.parts, tile, label, estado: 'mari', habs: [], its: {}, extra, nome: 'Mari Nutri', base: new THREE.Vector3(), cur: new THREE.Vector2(), alvo: new THREE.Vector2(),
+      fase: 0, idx: 0, t: 0, modo: 'acao', propAtual: null });
+  }
   S.cols = colunas();
   posicionar();
 }
@@ -358,7 +416,18 @@ function loop() {
     let y = 0, rx = 0;
     // reset suave
     const lerp = (o, k, val, s = 8) => { o[k] += (val - o[k]) * Math.min(1, dt * s); };
-    if (b.estado === 'aquecendo') {
+    if (b.estado === 'mari') {
+      const ciclo = b.fase % 6; const acena = ciclo < 2.4;
+      const ang = Math.atan2(S.cam.position.x - b.base.x, S.cam.position.z - b.base.z);
+      R.rotation.y += (ang - R.rotation.y) * Math.min(1, dt * 3);
+      if (acena) { lerp(P.armR.rotation, 'z', 2.5 + Math.sin(b.fase * 9) * .35, 10); lerp(P.armR.rotation, 'x', 0); }
+      else { lerp(P.armR.rotation, 'z', .15); }
+      lerp(P.armL.rotation, 'z', -.35); lerp(P.armL.rotation, 'x', -.2);
+      lerp(P.head.rotation, 'z', acena ? Math.sin(b.fase * 3) * .12 : 0, 4);
+      y = Math.abs(Math.sin(b.fase * 2.2)) * .06;
+      P.estrela.rotation.y = b.fase * 1.8;
+      b.extra.forEach((z, k) => { const a = b.fase * .9 + k * Math.PI / 2; z.position.set(Math.cos(a) * 1.25, 1.5 + Math.sin(b.fase * 1.6 + k) * .45, Math.sin(a) * 1.25); z.material.rotation = b.fase; });
+    } else if (b.estado === 'aquecendo') {
       const f = Math.sin(b.fase * 7);
       y = Math.abs(f) * .25;
       lerp(P.armL.rotation, 'z', -(.3 + 2.3 * (f * .5 + .5)), 20); lerp(P.armR.rotation, 'z', (.3 + 2.3 * (f * .5 + .5)), 20);
@@ -413,7 +482,7 @@ function loop() {
     if (b.estado !== 'dormindo') R.position.y = y;
     b.g.position.set(b.base.x + b.cur.x, 0, b.base.z + b.cur.y);
     // etiqueta
-    v.set(b.g.position.x, b.estado === 'dormindo' ? 1.45 : 2.75, b.g.position.z).project(S.cam);
+    v.set(b.g.position.x, b.estado === 'dormindo' ? 1.45 : b.estado === 'mari' ? 3.35 : 2.75, b.g.position.z).project(S.cam);
     const w = S.container.clientWidth, h = S.container.clientHeight;
     const vis = v.z < 1 && v.x > -1.1 && v.x < 1.1 && v.y > -1.1 && v.y < 1.1;
     b.label.style.display = vis ? '' : 'none';
@@ -423,7 +492,7 @@ function loop() {
       const perto = S.cam.position.distanceTo(S.ctl.target) < (S.distHome || 30) * .45 || b.label.classList.contains('foco');
       sp.style.display = perto ? '' : 'none';
       const bt = b.label.firstChild, nn = b.label.classList.contains('foco') ? b.label.dataset.full : b.label.dataset.curto; if (bt.textContent !== nn) bt.textContent = nn;
-      const txt = b.estado === 'aquecendo' ? '🔥 aquecendo' : b.estado === 'dormindo' ? '😴 dormindo' : (b.modo === 'anda' ? '🚶‍♀️ indo…' : ACAO_IC[b.habs[b.idx]] + ' ' + ACAO_VERBO[b.habs[b.idx]]);
+      const txt = b.estado === 'mari' ? '✨ sua nutri' : b.estado === 'aquecendo' ? '🔥 aquecendo' : b.estado === 'dormindo' ? '😴 dormindo' : (b.modo === 'anda' ? '🚶‍♀️ indo…' : ACAO_IC[b.habs[b.idx]] + ' ' + ACAO_VERBO[b.habs[b.idx]]);
       if (sp.textContent !== txt) sp.textContent = txt;
     }
   }
