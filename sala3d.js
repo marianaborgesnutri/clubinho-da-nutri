@@ -247,7 +247,7 @@ function enquadrar() {
   const { cam, ctl } = S;
   ctl.target.set(0, .6, .3);
   const asp = S.container.clientWidth / Math.max(1, S.container.clientHeight);
-  const dir = (asp < .85 ? new THREE.Vector3(.1, 1.75, 1) : new THREE.Vector3(.55, 1.3, 1)).normalize();
+  const dir = (asp < .85 ? new THREE.Vector3(.1, 1.75, 1) : new THREE.Vector3(.28, 1.2, 1)).normalize();
   const cantos = [];
   for (const x of [-S.W / 2, S.W / 2]) for (const z of [-S.D / 2, S.D / 2]) for (const y of [0, 1.8]) cantos.push(new THREE.Vector3(x * .96, y, z * .96));
   let lo = 4, hi = 300;
