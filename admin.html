@@ -150,6 +150,7 @@
         <select id="refSel"></select>
         <button class="btn sec" id="cpTop5">📋 Copiar Top 5</button>
         <button class="btn ghost" id="cpTodos">📋 Copiar todas</button>
+        <input type="search" id="buscaRank" autocomplete="off" placeholder="🔎 Pesquisar participante…" style="flex:1;min-width:180px">
       </div>
       <div class="tabela-wrap"><table>
         <thead><tr><th data-dica="Colocação no desafio, somando os pontos até o dia escolhido."><span>Pos.</span></th><th data-dica="Nome da participante."><span>Nome</span></th><th data-dica="Total de pontos: Grupo vale 1 e Insta vale 2 por hábito, até 8 por dia."><span>Pontos</span></th><th class="col-x" data-dica="Dias completos: dias em que ela registrou os 4 hábitos (alimentação, exercício, água e fruta). É o 1º critério de desempate."><span>Dias completos</span></th><th class="col-x" data-dica="Dias com registro: dias em que ela postou pelo menos 1 hábito. É o 2º critério de desempate."><span>Dias c/ registro</span></th><th data-dica="Variação: quantas posições ela subiu (▲) ou caiu (▼) em relação ao dia anterior. ＝ quer dizer que ficou na mesma posição."><span>Variação</span></th><th data-dica="Copia uma mensagem pronta com a colocação dela, para mandar no privado."><span>Copiar</span></th></tr></thead>
@@ -167,6 +168,7 @@
         <button class="btn" id="btNovo">Adicionar</button>
       </div>
     </div>
+    <input type="search" id="buscaPessoas" autocomplete="off" placeholder="🔎 Pesquisar participante…" style="width:100%;margin-bottom:8px">
     <p class="sub" style="margin:0 0 8px">Edite o nome e monte o robô de cada uma. As mudanças salvam sozinhas.</p>
     <div id="listaPessoas"></div>
   </section>
@@ -358,13 +360,15 @@
     desenharRanking();
   }
   $('refSel').onchange = desenharRanking;
+  $('buscaRank').addEventListener('input', desenharRanking);
   let rankAtual = [];
   function linhaTexto(x) { return x.pos + 'º ' + x.p.nome + ': ' + x.total + ' pts' + (x.var != null ? ' ' + C.seta(x.var) : ''); }
   function desenharRanking() {
     const ref = $('refSel').value;
     rankAtual = C.ranking(ativas(), listaRegs(), ref);
     const tb = $('tbRank'); tb.replaceChildren();
-    rankAtual.forEach(x => {
+    const qr = ($('buscaRank').value || '').trim().toLowerCase();
+    rankAtual.filter(x => !qr || x.p.nome.toLowerCase().includes(qr)).forEach(x => {
       const tr = el('tr', x.pos <= 5 && x.total > 0 ? 't5' : '');
       tr.append(el('td', null, x.pos + 'º'), el('td', null, x.p.nome), el('td', null, String(x.total)));
       const c1 = el('td', 'col-x', String(x.comp)), c2 = el('td', 'col-x', String(x.dias)); tr.append(c1, c2);
@@ -413,7 +417,8 @@
   }
   function renderPessoas() {
     const box = $('listaPessoas'); box.replaceChildren();
-    pessoas.forEach(p => {
+    const qp = ($('buscaPessoas').value || '').trim().toLowerCase();
+    pessoas.filter(p => !qp || p.nome.toLowerCase().includes(qp)).forEach(p => {
       const robo = Object.assign({ cor: 'salvia', cabelo: 'liso', corCabelo: 'castanho_escuro', acessorio: 'nenhum' }, p.robo || {});
       const d = el('div', 'part' + (p.ativo ? '' : ' inativa'));
       const prev = el('div', 'prev'); prev.innerHTML = Robo.svg(robo, 'ativo'); d.append(prev);
@@ -455,6 +460,7 @@
       box.append(d);
     });
   }
+  $('buscaPessoas').addEventListener('input', renderPessoas);
   $('btNovo').onclick = async () => {
     const nome = $('novoNome').value.trim().replace(/\s+/g, ' ');
     if (!nome) return;
