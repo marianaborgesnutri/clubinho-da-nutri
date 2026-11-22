@@ -1,0 +1,79 @@
+:root{
+  --verde:#55675B; --verde-esc:#3F4D44; --verde-claro:#8DA394; --rose:#D7B5AB; --rose-esc:#B98E82;
+  --blush:#ECDFD9; --creme:#F6F1ED; --cinza:#EEEEEE; --texto:#2F3A33; --muted:#7A847D;
+  --ok:#5E8B6C; --erro:#B5544A; --raio:22px; --sombra:0 10px 30px rgba(47,58,51,.10);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0}
+body{font-family:Montserrat,system-ui,-apple-system,sans-serif;background:var(--creme);color:var(--texto);min-height:100vh;
+  padding-bottom:env(safe-area-inset-bottom)}
+button,input,select,textarea{font-family:inherit}
+button{cursor:pointer}
+.hidden{display:none!important}
+.card{background:#fff;border-radius:var(--raio);box-shadow:var(--sombra);padding:18px}
+.card h2{margin:0 0 2px;font-size:17px;color:var(--verde-esc);display:flex;align-items:center;gap:8px}
+.sub{color:var(--muted);font-size:12.5px}
+.btn{border:0;background:var(--verde);color:#fff;font-weight:600;font-size:14px;padding:11px 16px;border-radius:14px}
+.btn.sec{background:var(--blush);color:var(--verde-esc)}
+.btn.ghost{background:transparent;border:1.5px solid var(--cinza);color:var(--verde-esc)}
+.btn.perigo{background:var(--erro)}
+.btn:disabled{opacity:.5}
+input[type=text],input[type=email],input[type=password],select{font-size:16px;padding:11px 13px;border-radius:13px;border:1.5px solid #E3DDD8;background:#fff;color:var(--texto);outline:none;min-width:0}
+input:focus,select:focus{border-color:var(--rose)}
+.toast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom));transform:translate(-50%,30px);opacity:0;background:var(--verde-esc);color:#fff;
+  padding:11px 18px;border-radius:999px;font-size:14px;font-weight:600;transition:.25s;z-index:999;pointer-events:none;max-width:90vw;text-align:center}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.toast.erro{background:var(--erro)}
+
+/* ===== robôs ===== */
+.robo-svg{width:100%;height:100%;overflow:visible;display:block}
+.robo-svg .braco{transform-box:fill-box;transform-origin:50% 10%;transition:transform .5s}
+.robo-svg .corpo-todo{transform-box:fill-box;transform-origin:50% 100%}
+.robo-svg .cabeca{transform-box:fill-box;transform-origin:50% 90%}
+@keyframes flutua{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+@keyframes pula{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+@keyframes bracoCima{0%,100%{transform:rotate(0)}50%{transform:rotate(160deg)}}
+@keyframes bracoCimaE{0%,100%{transform:rotate(0)}50%{transform:rotate(-160deg)}}
+@keyframes peso{0%,100%{transform:rotate(-20deg)}50%{transform:rotate(-150deg)}}
+@keyframes pesoE{0%,100%{transform:rotate(20deg)}50%{transform:rotate(150deg)}}
+@keyframes boca{0%,100%{transform:rotate(-150deg)}50%{transform:rotate(-125deg)}}
+@keyframes cochila{0%,100%{transform:rotate(-7deg)}50%{transform:rotate(-4deg)}}
+@keyframes zzz{0%{opacity:0;transform:translate(0,0) scale(.6)}30%{opacity:1}100%{opacity:0;transform:translate(14px,-26px) scale(1.15)}}
+@keyframes brilho{0%,100%{opacity:.4;transform:scale(.8) rotate(0)}50%{opacity:1;transform:scale(1.15) rotate(20deg)}}
+@keyframes antena{0%,100%{opacity:1}50%{opacity:.35}}
+
+.bot{position:relative;display:flex;flex-direction:column;align-items:center}
+.bot .fig{position:relative;width:100%;aspect-ratio:120/170}
+.bot .fig .robo-svg .corpo-todo{animation:flutua 3s ease-in-out infinite}
+.bot.aquecendo .robo-svg .corpo-todo{animation:pula .9s ease-in-out infinite}
+.bot.aquecendo .robo-svg .braco-d{animation:bracoCima .9s ease-in-out infinite}
+.bot.aquecendo .robo-svg .braco-e{animation:bracoCimaE .9s ease-in-out infinite}
+.bot.dormindo .fig{filter:grayscale(.55) brightness(.92);opacity:.78}
+.bot.dormindo .robo-svg .corpo-todo{animation:none}
+.bot.dormindo .robo-svg .cabeca{animation:cochila 4s ease-in-out infinite}
+.bot.dormindo .robo-svg .antena{fill:#9AA39D}
+.bot .zz{position:absolute;right:8%;top:6%;font-weight:800;color:var(--verde-claro);font-size:13px;pointer-events:none}
+.bot .zz span{position:absolute;animation:zzz 2.6s linear infinite}
+.bot .zz span:nth-child(2){animation-delay:.9s;font-size:11px}
+.bot .zz span:nth-child(3){animation-delay:1.8s;font-size:9px}
+.bot[data-acao=exercicio] .robo-svg .braco-d{animation:peso 1s ease-in-out infinite}
+.bot[data-acao=exercicio] .robo-svg .braco-e{animation:pesoE 1s ease-in-out infinite}
+.bot[data-acao=exercicio] .robo-svg .corpo-todo{animation:pula 1s ease-in-out infinite}
+.bot[data-acao=alimentacao] .robo-svg .braco-d,.bot[data-acao=agua] .robo-svg .braco-d,.bot[data-acao=fruta] .robo-svg .braco-d{animation:boca 1.1s ease-in-out infinite}
+.bot.ativo .robo-svg .antena{animation:antena 1.4s ease-in-out infinite}
+.bot.g1 .fig{filter:drop-shadow(0 0 4px rgba(215,181,171,.75))}
+.bot.g2 .fig{filter:drop-shadow(0 0 7px rgba(215,181,171,.95))}
+.bot.g3 .fig{filter:drop-shadow(0 0 9px rgba(240,205,140,.95))}
+.bot.g4 .fig{filter:drop-shadow(0 0 12px rgba(245,205,110,1)) drop-shadow(0 0 4px #fff)}
+.bot .brilhos{position:absolute;inset:0;pointer-events:none}
+.bot .brilhos i{position:absolute;font-style:normal;font-size:14px;animation:brilho 1.8s ease-in-out infinite}
+.bot .balao{position:absolute;top:-6px;left:50%;transform:translateX(-50%);background:#fff;border-radius:999px;padding:3px 8px 3px 6px;
+  font-size:11px;font-weight:700;color:var(--verde-esc);box-shadow:0 3px 10px rgba(0,0,0,.12);white-space:nowrap;display:flex;gap:4px;align-items:center;z-index:2;
+  transition:opacity .3s}
+.bot .balao b{font-size:14px;font-weight:400}
+.bot .itens{display:flex;gap:2px;justify-content:center;min-height:20px;font-size:15px;margin-top:-6px;flex-wrap:wrap}
+.bot .itens span{transition:transform .3s}
+.bot .itens span.atual{transform:translateY(-4px) scale(1.25)}
+.bot .nome{margin-top:4px;background:rgba(255,255,255,.92);border-radius:10px;padding:3px 7px;font-size:11px;font-weight:700;color:var(--verde-esc);
+  text-align:center;line-height:1.2;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media (prefers-reduced-motion:reduce){ .robo-svg *, .bot *{animation:none!important} }

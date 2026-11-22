@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#55675B">
+<title>Clubinho da Nutri | Desafio 21 dias</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="estilo.css">
+<style>
+  body{background:var(--creme)}
+  .topo{background:var(--verde);background-image:radial-gradient(circle at 10% -20%,#6C8173 0,transparent 55%),radial-gradient(circle at 100% 120%,#4A5B50 0,transparent 50%);
+    color:#fff;padding:calc(14px + env(safe-area-inset-top)) 16px 70px;border-radius:0 0 32px 32px}
+  .topo-in{max-width:1280px;margin:0 auto;display:flex;align-items:center;gap:14px}
+  .topo img{width:64px;height:64px;flex:none}
+  .topo h1{margin:0;font-size:20px;font-weight:800;line-height:1.15}
+  .topo .pill{display:inline-block;margin-top:5px;background:var(--rose);color:var(--verde-esc);font-weight:700;border-radius:999px;padding:4px 12px;font-size:12px}
+  .topo .dia{margin-left:auto;text-align:right;font-size:12px;color:var(--blush);font-weight:600}
+  .topo .dia b{display:block;font-size:22px;color:#fff;font-weight:800}
+  .barra{height:7px;background:rgba(255,255,255,.2);border-radius:99px;overflow:hidden;margin-top:6px;width:120px;margin-left:auto}
+  .barra i{display:block;height:100%;background:var(--rose);border-radius:99px}
+
+  .grade{max-width:1280px;margin:-52px auto 0;padding:0 12px 100px;display:grid;gap:14px;
+    grid-template-columns:1fr;grid-template-areas:"podio" "sala" "top" }
+  .a-podio{grid-area:podio}.a-sala{grid-area:sala}.a-top{grid-area:top}.a-chat{grid-area:chat}
+  @media (min-width:1000px){
+    .grade{grid-template-columns:320px 1fr 320px;grid-template-areas:"chat podio top" "chat sala top";align-items:start}
+    .a-chat{position:sticky;top:12px}
+  }
+
+  /* pódio */
+  .podio{display:flex;align-items:flex-end;justify-content:center;gap:8px;margin-top:10px;min-height:150px}
+  .degrau{flex:1;max-width:130px;display:flex;flex-direction:column;align-items:center}
+  .degrau .mini{width:62px}
+  .degrau .bloco{width:100%;border-radius:14px 14px 6px 6px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:8px;color:#fff;font-weight:800}
+  .degrau .bloco small{font-weight:600;font-size:11px;opacity:.9}
+  .degrau.p1 .bloco{height:84px;background:linear-gradient(#E3C27A,#C9A24F)}
+  .degrau.p2 .bloco{height:62px;background:linear-gradient(#C9CFCB,#9FA8A2)}
+  .degrau.p3 .bloco{height:46px;background:linear-gradient(#DDB3A3,#B98E82)}
+  .degrau .nm{font-size:11.5px;font-weight:700;color:var(--verde-esc);text-align:center;margin:4px 0;line-height:1.2;min-height:28px;display:flex;align-items:center}
+  .vazio{color:var(--muted);text-align:center;font-size:13.5px;padding:22px 10px}
+
+  /* top 5 */
+  .top5{list-style:none;margin:12px 0 0;padding:0;display:flex;flex-direction:column;gap:8px}
+  .top5 li{display:flex;align-items:center;gap:10px;background:var(--creme);border-radius:16px;padding:9px 12px}
+  .top5 li.l1{background:var(--blush)}
+  .top5 .pos{width:30px;text-align:center;font-size:20px;flex:none;font-weight:800;color:var(--verde)}
+  .top5 .cab{width:38px;height:38px;flex:none;overflow:hidden}
+  .top5 .cab .bot .fig{width:38px}
+  .top5 .nm{flex:1;font-weight:700;font-size:14px;min-width:0;overflow-wrap:break-word;hyphens:none}
+  .top5 .pts{font-weight:800;color:var(--verde-esc);text-align:right;white-space:nowrap;font-size:16px}
+  .top5 .pts small{display:block;font-size:10px;color:var(--muted);font-weight:600}
+  .var{font-size:11px;font-weight:800;border-radius:99px;padding:2px 7px;white-space:nowrap}
+  .var.up{background:#DDEDE2;color:#3E7A52}.var.down{background:#F6E0DB;color:#A9544A}.var.eq{background:var(--cinza);color:var(--muted)}
+
+  /* sala */
+  .sala-topo{display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap}
+  .sala-topo .busca{margin-left:auto;width:170px;padding:8px 12px;font-size:14px}
+  .legenda{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 0}
+  .legenda span{background:var(--creme);border-radius:99px;padding:4px 10px;font-size:11.5px;font-weight:600;color:var(--verde-esc)}
+  .sala{margin-top:12px;border-radius:20px;overflow:hidden;position:relative;
+    background:linear-gradient(#E9E1DA 0,#E9E1DA 64px,transparent 64px),
+      repeating-linear-gradient(90deg,#C9A27E 0 46px,#BF9673 46px 48px),#C9A27E}
+  .parede{height:64px;display:flex;align-items:center;justify-content:center;position:relative;border-bottom:6px solid #B98E82}
+  .parede .placa{background:var(--verde);color:#fff;font-weight:800;font-size:13px;padding:7px 14px;border-radius:10px;box-shadow:0 4px 0 #3F4D44;letter-spacing:.3px}
+  .luzes{position:absolute;top:6px;left:0;right:0;display:flex;justify-content:space-around;pointer-events:none}
+  .luzes i{width:8px;height:8px;border-radius:50%;animation:antena 1.6s ease-in-out infinite}
+  .luzes i:nth-child(3n){background:#E3C27A}.luzes i:nth-child(3n+1){background:#E58FA3;animation-delay:.5s}.luzes i:nth-child(3n+2){background:#9FE3C2;animation-delay:1s}
+  .piso{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:18px 8px;padding:22px 10px 18px;
+    background-image:linear-gradient(rgba(0,0,0,.04) 1px,transparent 1px);background-size:100% 70px}
+  .piso .bot{background:radial-gradient(ellipse at 50% 72%,rgba(255,255,255,.28) 0,transparent 62%);padding-top:12px}
+  .piso .bot .fig{width:84px}
+  @media (min-width:600px){.piso{grid-template-columns:repeat(auto-fill,minmax(112px,1fr))}.piso .bot .fig{width:94px}}
+
+  /* sala 3D */
+  .sala3d{position:relative;margin-top:12px;height:min(72vh,640px);min-height:420px;border-radius:20px;overflow:hidden;
+    background:linear-gradient(#F3ECE6,#E8DDD4);touch-action:none}
+  @media (min-width:1000px){.sala3d{height:640px}}
+  @media (max-width:600px){.legenda span{font-size:10.5px;padding:3px 8px}.sala-topo .busca{width:100%;margin-left:0}.s3-dica{font-size:10px;right:10px;text-align:center}}
+  .sala3d canvas{display:block;width:100%!important;height:100%!important}
+  .s3-labels{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+  .s3-nome{position:absolute;left:0;top:0;display:flex;flex-direction:column;align-items:center;gap:1px;white-space:nowrap;will-change:transform}
+  .s3-nome b{background:rgba(255,255,255,.93);color:var(--verde-esc);font-size:10.5px;font-weight:800;padding:2px 7px;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,.12)}
+  .s3-nome span{background:var(--verde);color:#fff;font-size:9.5px;font-weight:700;padding:1px 6px;border-radius:8px}
+  .s3-nome.dorm span{background:#9AA39D}
+  .s3-nome.foco b{background:var(--rose);font-size:12.5px}
+  .s3-dica{position:absolute;left:10px;top:10px;z-index:2;background:rgba(255,255,255,.85);border-radius:99px;padding:5px 11px;font-size:11px;font-weight:600;color:var(--verde-esc);pointer-events:none}
+  .s3-home{position:absolute;right:10px;bottom:10px;z-index:2;border:0;background:var(--verde);color:#fff;border-radius:99px;padding:9px 13px;font-weight:700;font-size:12.5px;box-shadow:0 4px 12px rgba(0,0,0,.2)}
+
+  /* chat */
+  .chat-card{display:flex;flex-direction:column;height:min(78vh,720px);padding:0;overflow:hidden}
+  .chat-cab{padding:14px 16px;border-bottom:1px solid var(--cinza);display:flex;align-items:center;gap:8px}
+  .chat-cab h2{margin:0;font-size:16px}
+  .chat-cab .fechar{margin-left:auto;border:0;background:var(--creme);width:34px;height:34px;border-radius:50%;font-size:18px;color:var(--verde-esc)}
+  .msgs{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;background:#F8F4F1;-webkit-overflow-scrolling:touch}
+  .msg{max-width:84%;background:#fff;border-radius:16px 16px 16px 4px;padding:8px 11px;box-shadow:0 1px 2px rgba(0,0,0,.06);align-self:flex-start;position:relative}
+  .msg.eu{align-self:flex-end;background:#E2ECE5;border-radius:16px 16px 4px 16px}
+  .msg .quem{font-size:11.5px;font-weight:800;color:var(--rose-esc);margin-bottom:2px}
+  .msg.eu .quem{color:var(--verde)}
+  .msg .tx{font-size:14px;white-space:pre-wrap;overflow-wrap:anywhere}
+  .msg img{display:block;max-width:100%;border-radius:10px;margin-top:4px;cursor:zoom-in}
+  .msg .hr{font-size:10px;color:var(--muted);text-align:right;margin-top:2px}
+  .msg .lixo{position:absolute;top:-8px;right:-8px;border:0;background:var(--erro);color:#fff;border-radius:50%;width:24px;height:24px;font-size:12px}
+  .envio{display:flex;gap:6px;padding:10px;border-top:1px solid var(--cinza);align-items:flex-end;background:#fff}
+  .envio input[type=text]{flex:1}
+  .envio .ic{flex:none;width:44px;height:44px;border-radius:50%;border:0;background:var(--blush);font-size:19px}
+  .envio .ic.enviar{background:var(--verde);color:#fff}
+  .prev-foto{padding:8px 12px 0;display:flex;align-items:center;gap:8px;background:#fff}
+  .prev-foto img{height:60px;border-radius:8px}
+  .portao{flex:1;display:flex;flex-direction:column;justify-content:center;gap:10px;padding:22px;text-align:center}
+  .portao p{margin:0;color:var(--muted);font-size:14px}
+  .fab{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:50;border:0;background:var(--verde);color:#fff;
+    border-radius:999px;padding:14px 18px;font-weight:700;font-size:15px;box-shadow:0 8px 24px rgba(47,58,51,.35);display:flex;gap:8px;align-items:center}
+  .fab .badge{background:var(--rose);color:var(--verde-esc);border-radius:99px;font-size:11px;padding:2px 7px}
+  @media (max-width:999px){
+    .a-chat{position:fixed;inset:0;z-index:60;background:rgba(30,38,33,.45);display:flex;align-items:flex-end}
+    .a-chat.fechado{display:none}
+    .a-chat .chat-card{width:100%;height:calc(100% - 40px - env(safe-area-inset-top));border-radius:24px 24px 0 0;padding-bottom:env(safe-area-inset-bottom)}
+  }
+  @media (min-width:1000px){ .fab,.chat-cab .fechar{display:none} .a-chat.fechado{display:block} }
+  .lightbox{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:100;display:flex;align-items:center;justify-content:center;padding:16px}
+  .lightbox img{max-width:100%;max-height:100%;border-radius:12px}
+  .rodape{text-align:center;color:var(--muted);font-size:12px;padding:10px}
+</style>
+</head>
+<body>
+<header class="topo">
+  <div class="topo-in">
+    <img class="logo" alt="Mariana Borges Nutricionista">
+    <div>
+      <h1>Clubinho da Nutri</h1>
+      <span class="pill">Desafio 21 dias</span>
+    </div>
+    <div class="dia"><span id="diaTitulo">Carregando…</span><b id="diaNum"></b><div class="barra"><i id="diaBarra" style="width:0"></i></div></div>
+  </div>
+</header>
+
+<main class="grade">
+  <section class="card a-podio">
+    <h2>🏅 Pódio do dia</h2>
+    <div class="sub" id="podioSub">As 3 que mais pontuaram no dia</div>
+    <div id="podio"><div class="vazio">Carregando…</div></div>
+  </section>
+
+  <section class="card a-sala">
+    <div class="sala-topo">
+      <div>
+        <h2>🤖 Sala do Clubinho</h2>
+        <div class="sub" id="salaSub"></div>
+      </div>
+      <input type="text" class="busca" id="busca" placeholder="Achar meu robô 🔎">
+    </div>
+    <div class="legenda">
+      <span>🥗 Alimentação</span><span>🏋️‍♀️ Exercício</span><span>💧 Água</span><span>🍎 Fruta</span><span>✨ Brilha mais quem fez mais</span><span>😴 Dormindo</span>
+    </div>
+    <div class="sala3d hidden" id="sala3d">
+      <div class="s3-dica">👆 Arraste para girar · pinça para zoom · toque num robô</div>
+      <button class="s3-home" id="s3home">⟲ Ver a sala toda</button>
+    </div>
+    <div class="sala" id="sala2d">
+      <div class="parede"><div class="luzes"></div><div class="placa">CLUBINHO DA NUTRI</div></div>
+      <div class="piso" id="piso"></div>
+    </div>
+  </section>
+
+  <section class="card a-top">
+    <h2>🏆 Top 5 geral</h2>
+    <div class="sub" id="topSub"></div>
+    <ol class="top5" id="top5"></ol>
+    <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+      <button class="btn sec" id="copiarTop" style="flex:1">📋 Copiar para o WhatsApp</button>
+    </div>
+    <p class="sub" style="margin:12px 2px 0;text-align:center">Quer saber a sua colocação? É só chamar a Mari no privado 😉</p>
+  </section>
+
+  <section class="a-chat fechado" id="chatWrap">
+    <div class="card chat-card">
+      <div class="chat-cab"><h2>💬 Chat do Clubinho</h2><button class="fechar" id="fecharChat" aria-label="Fechar">×</button></div>
+      <div class="portao" id="portaoSenha">
+        <div style="font-size:34px">🔒</div>
+        <p>Digite a senha do Clubinho para entrar no chat</p>
+        <input type="password" id="senha" placeholder="Senha" autocomplete="off">
+        <button class="btn" id="entrarSenha">Entrar</button>
+      </div>
+      <div class="portao hidden" id="portaoNome">
+        <div style="font-size:34px">👋</div>
+        <p>Como você quer aparecer no chat? Use seu nome e sobrenome.</p>
+        <input type="text" id="meuNome" maxlength="40" placeholder="Seu nome e sobrenome">
+        <button class="btn" id="salvarNome">Começar a conversar</button>
+      </div>
+      <div class="msgs hidden" id="msgs"></div>
+      <div class="prev-foto hidden" id="prevFoto"><img id="prevImg" alt=""><button class="btn ghost" id="tirarFoto">Remover foto</button></div>
+      <form class="envio hidden" id="envio">
+        <button type="button" class="ic" id="btFoto" aria-label="Enviar foto">📷</button>
+        <input type="file" id="arquivo" accept="image/*" class="hidden">
+        <input type="text" id="texto" maxlength="1000" placeholder="Escreva uma mensagem…" autocomplete="off">
+        <button type="submit" class="ic enviar" id="btEnviar" aria-label="Enviar">➤</button>
+      </form>
+    </div>
+  </section>
+</main>
+<div class="rodape">Mariana Borges Nutricionista 💚</div>
+<button class="fab" id="abrirChat">💬 Chat <span class="badge hidden" id="badge">novo</span></button>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.js"></script>
+<script src="logo.js"></script>
+<script src="config.js"></script>
+<script src="comum.js"></script>
+<script src="robo.js"></script>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+<script type="module" src="sala3d.js"></script>
+<script>
+(function(){
+  const C = CLUBE, sb = C.sb, el = C.el;
+  const HAB = Object.fromEntries(C.HABITOS.map(h => [h.k, h]));
+  let painel = null, roboPorNome = new Map(), timers = [];
+
+  document.querySelector('.luzes').innerHTML = '<i></i>'.repeat(18);
+
+  function bot(robo, estado, habs, nome, opts) {
+    opts = opts || {};
+    const w = el('div', 'bot ' + estado + (habs && habs.length ? ' g' + habs.length : ''));
+    const fig = el('div', 'fig'); fig.innerHTML = Robo.svg(robo, estado); w.append(fig);
+    if (opts.mini) return w;
+    if (estado === 'dormindo') { const z = el('div', 'zz'); z.innerHTML = '<span>z</span><span>z</span><span>z</span>'; w.append(z); }
+    if (habs && habs.length === 4) {
+      const b = el('div', 'brilhos');
+      [[6, 10, 0], [78, 22, .6], [14, 58, 1.1], [84, 64, .3]].forEach(([x, y, d]) => { const i = el('i', null, '✨'); i.style.left = x + '%'; i.style.top = y + '%'; i.style.animationDelay = d + 's'; b.append(i); });
+      w.append(b);
+    }
+    if (estado === 'aquecendo') { const b = el('div', 'balao'); b.innerHTML = '<b>🔥</b>aquecendo'; w.append(b); }
+    if (estado === 'dormindo') { const b = el('div', 'balao'); b.style.opacity = '.85'; b.innerHTML = '<b>😴</b>dormindo'; w.append(b); }
+    if (habs && habs.length) {
+      const ordem = C.HABITOS.map(h => h.k).filter(k => habs.includes(k));
+      const balao = el('div', 'balao'); w.append(balao);
+      const itens = el('div', 'itens'); ordem.forEach(k => { const s = el('span', null, HAB[k].ic); s.dataset.k = k; itens.append(s); }); w.append(itens);
+      let i = Math.floor(Math.random() * ordem.length);
+      const passo = () => {
+        const k = ordem[i % ordem.length]; i++;
+        w.dataset.acao = k; balao.innerHTML = '<b>' + HAB[k].ic + '</b>' + HAB[k].verbo;
+        itens.querySelectorAll('span').forEach(s => s.classList.toggle('atual', s.dataset.k === k));
+      };
+      passo();
+      if (ordem.length > 1) setTimeout(() => timers.push(setInterval(passo, 2800)), Math.random() * 2000);
+    } else if (estado !== 'aquecendo') { w.append(el('div', 'itens')); }
+    if (nome) w.append(el('div', 'nome', nome));
+    return w;
+  }
+
+  function renderTopo() {
+    const hoje = C.hojeSP();
+    let titulo, num = '', pct = 0;
+    if (hoje < C.INICIO) { titulo = 'Começa em'; num = C.ddmm(C.INICIO); }
+    else if (hoje > C.FIM) { titulo = 'Desafio encerrado'; num = '🎉'; pct = 100; }
+    else { const n = C.numDia(hoje); titulo = 'Dia'; num = n + ' de 21'; pct = n / 21 * 100; }
+    document.getElementById('diaTitulo').textContent = titulo;
+    document.getElementById('diaNum').textContent = num;
+    document.getElementById('diaBarra').style.width = pct + '%';
+  }
+
+  function render() {
+    timers.forEach(clearInterval); timers = [];
+    const p = painel; const ref = p.ref;
+    roboPorNome = new Map(p.sala.map(s => [s.nome, s.robo]));
+
+    // pódio
+    const pod = document.getElementById('podio'); pod.replaceChildren();
+    document.getElementById('podioSub').textContent = ref ? 'As 3 que mais pontuaram em ' + C.semana(ref) + ', ' + C.ddmm(ref) : 'As 3 que mais pontuaram no dia';
+    if (!p.podio.length) {
+      pod.append(el('div', 'vazio', ref ? 'Ninguém pontuou nesse dia ainda.' : '🔥 Os robôs estão se aquecendo! O primeiro pódio aparece depois do primeiro dia de desafio.'));
+    } else {
+      const box = el('div', 'podio');
+      const ordem = [1, 0, 2];
+      ordem.forEach(i => {
+        const x = p.podio[i]; if (!x) { box.append(el('div', 'degrau')); return; }
+        const d = el('div', 'degrau p' + (i + 1));
+        const m = el('div', 'mini'); m.append(bot(roboPorNome.get(x.nome), 'ativo', [], null, { mini: true })); d.append(m);
+        d.append(el('div', 'nm', x.nome));
+        const b = el('div', 'bloco', ['🥇', '🥈', '🥉'][i]); b.append(el('small', null, x.pontos + ' pts')); d.append(b);
+        box.append(d);
+      });
+      pod.append(box);
+    }
+
+    // top 5
+    const t = document.getElementById('top5'); t.replaceChildren();
+    document.getElementById('topSub').textContent = ref ? 'Pontos somados até ' + C.ddmm(ref) + ' · ' + p.total + ' participantes' : p.total + ' participantes na largada 💚';
+    if (!p.top5.length) {
+      const li = el('li'); li.append(el('div', 'nm', 'O placar começa depois do primeiro dia. Bora! 💪')); t.append(li);
+    }
+    p.top5.forEach((x, i) => {
+      const li = el('li', i === 0 ? 'l1' : '');
+      li.append(el('div', 'pos', ['🥇', '🥈', '🥉', '4º', '5º'][i]));
+      const cab = el('div', 'cab'); cab.append(bot(roboPorNome.get(x.nome), 'ativo', [], null, { mini: true })); li.append(cab);
+      const nm = el('div', 'nm', x.nome); li.append(nm);
+      if (x.var != null) {
+        const v = el('span', 'var ' + (x.var > 0 ? 'up' : x.var < 0 ? 'down' : 'eq'), x.var > 0 ? '▲ ' + x.var : x.var < 0 ? '▼ ' + Math.abs(x.var) : '＝');
+        li.append(v);
+      }
+      const pts = el('div', 'pts', String(x.pontos)); pts.append(el('small', null, 'pontos')); li.append(pts);
+      t.append(li);
+    });
+
+    // sala
+    const hoje = C.hojeSP();
+    document.getElementById('salaSub').textContent = ref
+      ? 'Mostrando o que cada uma fez em ' + C.semana(ref) + ', ' + C.ddmm(ref)
+      : (hoje < C.INICIO ? 'Todos se aquecendo para a largada de ' + C.ddmm(C.INICIO) + '! 🔥' : 'Todos se aquecendo! As atividades aparecem depois do primeiro dia 🔥');
+    filtrarSala();
+  }
+
+  let s3ok = false, s3chave = '';
+  function sala3d() {
+    if (!window.Sala3D || !Sala3D.pronto) return false;
+    if (!s3ok) {
+      document.getElementById('sala3d').classList.remove('hidden');
+      document.getElementById('sala2d').classList.add('hidden');
+      s3ok = Sala3D.montar(document.getElementById('sala3d'));
+      if (!s3ok) { document.getElementById('sala3d').classList.add('hidden'); document.getElementById('sala2d').classList.remove('hidden'); return false; }
+    }
+    if (painel) {
+      const ch = JSON.stringify([painel.ref, painel.sala]);
+      if (ch !== s3chave) { s3chave = ch; Sala3D.atualizar(painel.sala, !painel.ref); }
+    }
+    return true;
+  }
+  window.addEventListener('sala3d-pronta', () => sala3d());
+  document.getElementById('s3home').onclick = () => { document.getElementById('busca').value = ''; window.Sala3D && Sala3D.inicio(); };
+  function filtrarSala() {
+    if (!painel) return;
+    if (sala3d()) { const q = document.getElementById('busca').value.trim(); if (q.length >= 2) { if (!Sala3D.focar(q)) C.toast('Não achei esse nome'); } return; }
+    const q = document.getElementById('busca').value.trim().toLowerCase();
+    const piso = document.getElementById('piso'); piso.replaceChildren();
+    painel.sala.filter(s => !q || s.nome.toLowerCase().includes(q)).forEach(s => {
+      const habs = s.hab || [];
+      const estado = !painel.ref ? 'aquecendo' : habs.length ? 'ativo' : 'dormindo';
+      piso.append(bot(s.robo, estado, habs, s.nome));
+    });
+  }
+  let tBusca; document.getElementById('busca').addEventListener('input', () => { clearTimeout(tBusca); tBusca = setTimeout(() => { if (!s3ok) { timers.forEach(clearInterval); timers = []; } filtrarSala(); }, 350); });
+
+  document.getElementById('copiarTop').onclick = async () => {
+    if (!painel || !painel.top5.length) { C.toast('O placar ainda não começou'); return; }
+    let s = '🏆 *Placar do Clubinho da Nutri*\n';
+    if (painel.ref) s += 'Pontos até ' + C.ddmm(painel.ref) + ' (dia ' + C.numDia(painel.ref) + ' de 21)\n';
+    s += '\n';
+    painel.top5.forEach((x, i) => { s += ['🥇', '🥈', '🥉', '4º', '5º'][i] + ' ' + x.nome + ': ' + x.pontos + ' pts' + (x.var != null ? ' ' + C.seta(x.var) : '') + '\n'; });
+    if (painel.podio.length) { s += '\n🏅 *Pódio do dia ' + C.ddmm(painel.ref) + '*\n'; painel.podio.forEach((x, i) => { s += ['🥇', '🥈', '🥉'][i] + ' ' + x.nome + ' (' + x.pontos + ' pts)\n'; }); }
+    s += '\nQuer saber a sua colocação? Me chama no privado 😉\nBora manter a constância! 💚\n' + location.href.split('#')[0];
+    (await C.copiar(s)) ? C.toast('Copiado! É só colar no WhatsApp ✓') : C.toast('Não consegui copiar', 'erro');
+  };
+
+  async function carregar() {
+    if (!sb) { document.getElementById('podio').innerHTML = '<div class="vazio">Site ainda não configurado.</div>'; return; }
+    const { data, error } = await sb.rpc('painel_publico');
+    if (error) { C.toast('Não foi possível atualizar o placar', 'erro'); return; }
+    const novo = JSON.stringify(data);
+    if (painel && JSON.stringify(painel) === novo) return;
+    painel = data; render();
+  }
+  renderTopo(); carregar();
+  setInterval(() => { if (!document.hidden) { renderTopo(); carregar(); } }, 60000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) carregar(); });
+
+  // ===================== CHAT =====================
+  const LS = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) { } } };
+  let senha = LS.get('clube_senha'), meuNome = LS.get('clube_nome'), ultimoId = 0, fotoData = null, souAdmin = false, pollT = null, abertoMobile = false;
+  const msgsEl = document.getElementById('msgs');
+  const wrap = document.getElementById('chatWrap');
+  const desktop = () => window.matchMedia('(min-width:1000px)').matches;
+
+  function mostrar(etapa) {
+    document.getElementById('portaoSenha').classList.toggle('hidden', etapa !== 'senha');
+    document.getElementById('portaoNome').classList.toggle('hidden', etapa !== 'nome');
+    msgsEl.classList.toggle('hidden', etapa !== 'chat');
+    document.getElementById('envio').classList.toggle('hidden', etapa !== 'chat');
+  }
+  function etapaAtual() { return !senha ? 'senha' : !meuNome ? 'nome' : 'chat'; }
+
+  function hora(iso) {
+    const d = new Date(iso);
+    const dia = new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Sao_Paulo', day: '2-digit', month: '2-digit' }).format(d);
+    const h = new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Sao_Paulo', hour: '2-digit', minute: '2-digit' }).format(d);
+    return dia + ' ' + h;
+  }
+  function addMsg(m) {
+    if (msgsEl.querySelector('[data-id="' + m.id + '"]')) return;
+    const eu = meuNome && m.nome.trim().toLowerCase() === meuNome.trim().toLowerCase();
+    const d = el('div', 'msg' + (eu ? ' eu' : '')); d.dataset.id = m.id;
+    d.append(el('div', 'quem', m.nome));
+    if (m.foto) { const img = el('img'); img.src = m.foto; img.alt = 'Foto de ' + m.nome; img.loading = 'lazy'; img.onclick = () => abrirFoto(m.foto); d.append(img); }
+    if (m.texto) d.append(el('div', 'tx', m.texto));
+    d.append(el('div', 'hr', hora(m.em)));
+    if (souAdmin) {
+      const b = el('button', 'lixo', '🗑'); b.title = 'Apagar';
+      b.onclick = async () => { const { error } = await sb.from('mensagens').update({ apagada: true }).eq('id', m.id); if (error) C.toast('Não consegui apagar', 'erro'); else { d.remove(); C.toast('Mensagem apagada'); } };
+      d.append(b);
+    }
+    msgsEl.append(d);
+  }
+  function abrirFoto(src) { const l = el('div', 'lightbox'); const i = el('img'); i.src = src; l.append(i); l.onclick = () => l.remove(); document.body.append(l); }
+
+  async function buscar(primeira) {
+    if (!sb || !senha) return;
+    const { data, error } = await sb.rpc('chat_listar', { p_senha: senha, p_depois: ultimoId });
+    if (error) {
+      if (String(error.message).includes('senha_invalida')) { senha = null; LS.set('clube_senha', ''); mostrar('senha'); C.toast('Senha incorreta', 'erro'); }
+      return;
+    }
+    if (!data || !data.length) return;
+    const perto = msgsEl.scrollHeight - msgsEl.scrollTop - msgsEl.clientHeight < 120;
+    data.forEach(addMsg);
+    ultimoId = Math.max(ultimoId, ...data.map(m => m.id));
+    if (primeira || perto) msgsEl.scrollTop = msgsEl.scrollHeight;
+    if (!primeira && !desktop() && !abertoMobile) document.getElementById('badge').classList.remove('hidden');
+  }
+  async function limparApagadas() {
+    if (!sb || !senha) return;
+    const { data } = await sb.rpc('chat_ids_apagados', { p_senha: senha });
+    (data || []).forEach(id => { const n = msgsEl.querySelector('[data-id="' + id + '"]'); if (n) n.remove(); });
+  }
+  function iniciarChat() {
+    const e = etapaAtual(); mostrar(e);
+    if (e !== 'chat') return;
+    buscar(true);
+    clearInterval(pollT);
+    let n = 0;
+    pollT = setInterval(() => { if (document.hidden) return; buscar(false); if (++n % 6 === 0) limparApagadas(); }, 5000);
+  }
+
+  document.getElementById('entrarSenha').onclick = async () => {
+    const v = document.getElementById('senha').value.trim().toLowerCase();
+    if (!v) return;
+    const { error } = await sb.rpc('chat_listar', { p_senha: v, p_depois: 2147483647 });
+    if (error) { C.toast('Senha incorreta', 'erro'); return; }
+    senha = v; LS.set('clube_senha', v); iniciarChat();
+  };
+  document.getElementById('senha').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('entrarSenha').click(); });
+  document.getElementById('salvarNome').onclick = () => {
+    const v = document.getElementById('meuNome').value.trim().replace(/\s+/g, ' ');
+    if (v.split(' ').length < 2) { C.toast('Coloque nome e sobrenome 😊'); return; }
+    meuNome = v; LS.set('clube_nome', v); iniciarChat();
+  };
+
+  // foto: reduz no aparelho antes de enviar
+  document.getElementById('btFoto').onclick = () => document.getElementById('arquivo').click();
+  document.getElementById('arquivo').onchange = async (e) => {
+    const f = e.target.files[0]; e.target.value = '';
+    if (!f) return;
+    try { fotoData = await reduzir(f); document.getElementById('prevImg').src = fotoData; document.getElementById('prevFoto').classList.remove('hidden'); }
+    catch (err) { C.toast('Não consegui abrir essa foto', 'erro'); }
+  };
+  document.getElementById('tirarFoto').onclick = () => { fotoData = null; document.getElementById('prevFoto').classList.add('hidden'); };
+  function reduzir(file) {
+    return new Promise((ok, falha) => {
+      const url = URL.createObjectURL(file); const img = new Image();
+      img.onload = () => {
+        let tam = 1000, q = .72, out;
+        for (let t = 0; t < 4; t++) {
+          const s = Math.min(1, tam / Math.max(img.width, img.height));
+          const c = document.createElement('canvas'); c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
+          c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+          out = c.toDataURL('image/jpeg', q);
+          if (out.length < 600000) break; tam -= 200; q -= .1;
+        }
+        URL.revokeObjectURL(url); ok(out);
+      };
+      img.onerror = falha; img.src = url;
+    });
+  }
+  document.getElementById('envio').onsubmit = async (e) => {
+    e.preventDefault();
+    const inp = document.getElementById('texto'); const tx = inp.value.trim();
+    if (!tx && !fotoData) return;
+    const bt = document.getElementById('btEnviar'); bt.disabled = true;
+    const { error } = await sb.rpc('chat_enviar', { p_senha: senha, p_nome: meuNome, p_texto: tx || null, p_foto: fotoData });
+    bt.disabled = false;
+    if (error) { C.toast('Não foi possível enviar', 'erro'); return; }
+    inp.value = ''; fotoData = null; document.getElementById('prevFoto').classList.add('hidden');
+    await buscar(false); msgsEl.scrollTop = msgsEl.scrollHeight;
+  };
+
+  document.getElementById('abrirChat').onclick = () => { abertoMobile = true; wrap.classList.remove('fechado'); document.getElementById('badge').classList.add('hidden'); document.body.style.overflow = 'hidden'; msgsEl.scrollTop = msgsEl.scrollHeight; };
+  function fecharChat() { abertoMobile = false; wrap.classList.add('fechado'); document.body.style.overflow = ''; }
+  document.getElementById('fecharChat').onclick = fecharChat;
+  wrap.addEventListener('click', e => { if (e.target === wrap && !desktop()) fecharChat(); });
+
+  (async () => {
+    if (sb) {
+      try { const { data: s } = await sb.auth.getSession(); if (s && s.session) { const { data } = await sb.rpc('is_admin'); souAdmin = !!data; } } catch (e) { }
+    }
+    iniciarChat();
+  })();
+})();
+</script>
+</body>
+</html>
