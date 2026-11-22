@@ -236,6 +236,41 @@ function iniciar(container) {
   r.setAnimationLoop(loop);
 }
 
+function calendario() {
+  const C = window.CLUBE || {};
+  const hoje = C.hojeSP ? C.hojeSP() : new Date().toISOString().slice(0, 10);
+  const [y, m, d] = hoje.split('-').map(Number);
+  const MESES = ['JANEIRO', 'FEVEREIRO', 'MARÇO', 'ABRIL', 'MAIO', 'JUNHO', 'JULHO', 'AGOSTO', 'SETEMBRO', 'OUTUBRO', 'NOVEMBRO', 'DEZEMBRO'];
+  const SEM = ['domingo', 'segunda-feira', 'terça-feira', 'quarta-feira', 'quinta-feira', 'sexta-feira', 'sábado'];
+  const wd = new Date(Date.UTC(y, m - 1, d)).getUTCDay();
+  const total = C.dias ? C.dias().length : 21;
+  const n = C.numDia ? C.numDia(hoje) : 1;
+  return texCanvas(512, 640, (g, w, h) => {
+    g.fillStyle = 'rgba(0,0,0,.12)'; g.beginPath(); g.roundRect(14, 22, w - 20, h - 26, 36); g.fill();
+    g.fillStyle = '#ffffff'; g.beginPath(); g.roundRect(6, 12, w - 20, h - 26, 36); g.fill();
+    g.fillStyle = '#D7B5AB'; g.beginPath(); g.roundRect(6, 12, w - 20, 108, [36, 36, 0, 0]); g.fill();
+    g.fillStyle = '#55675B'; [130, w - 154].forEach(x => { g.beginPath(); g.roundRect(x, 0, 18, 44, 9); g.fill(); });
+    g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillStyle = '#fff'; g.font = '800 44px Montserrat, sans-serif'; g.fillText(MESES[m - 1] + ' ' + y, w / 2 - 7, 76);
+    g.fillStyle = '#3F4D44'; g.font = '900 190px Montserrat, sans-serif'; g.fillText(String(d), w / 2 - 7, 232);
+    g.fillStyle = '#8A8F8B'; g.font = '700 38px Montserrat, sans-serif'; g.fillText(SEM[wd], w / 2 - 7, 344);
+    // 21 bolinhas: dias que já foram, hoje e os que faltam
+    const r = 13, gap = 46, x0 = w / 2 - 7 - gap * 3;
+    for (let i = 0; i < total; i++) {
+      const cx = x0 + (i % 7) * gap, cy = 400 + Math.floor(i / 7) * 40;
+      g.beginPath(); g.arc(cx, cy, i + 1 === n ? r + 4 : r, 0, Math.PI * 2);
+      g.fillStyle = i + 1 < n ? '#8DA394' : i + 1 === n ? '#D7B5AB' : '#ECE6E1'; g.fill();
+      if (i + 1 === n) { g.lineWidth = 4; g.strokeStyle = '#55675B'; g.stroke(); }
+    }
+    let txt;
+    if (n < 1) { const f = 1 - n; txt = f === 1 ? 'Começa amanhã!' : 'Faltam ' + f + ' dias'; }
+    else if (n > total) txt = 'Desafio concluído!';
+    else txt = 'Dia ' + n + ' de ' + total;
+    g.fillStyle = '#55675B'; g.beginPath(); g.roundRect(56, 528, w - 132, 74, 37); g.fill();
+    g.fillStyle = '#fff'; g.font = '800 40px Montserrat, sans-serif'; g.fillText(txt, w / 2 - 7, 566);
+  });
+}
+
 function montarSala(cols, rows) {
   if (S.room) S.scene.remove(S.room);
   const room = new THREE.Group(); S.room = room;
@@ -263,6 +298,10 @@ function montarSala(cols, rows) {
   const pw = Math.min(W * .6, 9);
   const pl = new THREE.Mesh(new THREE.PlaneGeometry(pw, pw * 220 / 1024), new THREE.MeshBasicMaterial({ map: placa, transparent: true }));
   pl.position.set(0, 2.7, -D / 2 + .02); room.add(pl);
+  // calendário na parede: dia de hoje e em que dia do desafio estamos
+  { const cal = calendario(); const cw = 2.6, ch = cw * 640 / 512;
+    const cm = new THREE.Mesh(new THREE.PlaneGeometry(cw, ch), new THREE.MeshBasicMaterial({ map: cal, transparent: true }));
+    cm.position.set(-Math.min(pw / 2 + cw / 2 + .4, W / 2 - cw / 2 - .3), 2.15, -D / 2 + .03); room.add(cm); }
   // luzinhas
   S.luzes = [];
   const cores = [0xE3C27A, 0xE58FA3, 0x9FE3C2];
@@ -331,7 +370,7 @@ function posicionar() {
   montarSala(cols, rt);
   S.bots.forEach((b, i) => {
     let cx = (i % cols - (cols - 1) / 2) * TILE, cz = (Math.floor(i / cols) - (rt - 1) / 2) * TILE;
-    if (b.estado === 'mari') { cx = 0; cz = (rows - (rt - 1) / 2) * TILE; }
+    if (b.mari) { cx = 0; cz = (rows - (rt - 1) / 2) * TILE; }
     b.base.set(cx, 0, cz); b.g.position.set(cx, 0, cz); b.cur.set(0, 0); b.alvo.set(0, 0);
     b.tile.position.set(cx, .015, cz);
   });
@@ -384,11 +423,13 @@ function atualizar(sala, aquecendo) {
   {
     const R = roboMari(); const g = new THREE.Group(); const lift = new THREE.Group(); lift.position.y = .26; lift.add(R); g.add(lift); S.scene.add(g);
     const tile = palco(); S.scene.add(tile);
+    const habsM = ['alimentacao', 'exercicio', 'agua', 'fruta'], itsM = {};
+    habsM.forEach(h => { const it = item(h); it.position.set(POS_HAB[h][0], .26, POS_HAB[h][1]); tile.add(it); itsM[h] = it; });
     const extra = []; for (let k = 0; k < 4; k++) { const z = textoSprite('✦', k % 2 ? '#E2B65A' : '#D7B5AB', 96); z.scale.setScalar(.45); g.add(z); extra.push(z); }
     const label = document.createElement('div'); label.className = 's3-nome mari';
     label.innerHTML = '<b></b><span></span>'; label.querySelector('b').textContent = 'Mari Nutri 💚'; label.dataset.curto = 'Mari Nutri 💚'; label.dataset.full = 'Mari Nutri 💚';
     S.labels.append(label);
-    S.bots.push({ g, R, P: R.userData.parts, tile, label, estado: 'mari', habs: [], its: {}, extra, nome: 'Mari Nutri', base: new THREE.Vector3(), cur: new THREE.Vector2(), alvo: new THREE.Vector2(),
+    S.bots.push({ g, R, P: R.userData.parts, tile, label, estado: 'ativo', mari: true, habs: habsM, its: itsM, extra, nome: 'Mari Nutri', base: new THREE.Vector3(), cur: new THREE.Vector2(), alvo: new THREE.Vector2(),
       fase: 0, idx: 0, t: 0, modo: 'acao', propAtual: null });
   }
   S.cols = colunas();
@@ -416,16 +457,18 @@ function loop() {
     let y = 0, rx = 0;
     // reset suave
     const lerp = (o, k, val, s = 8) => { o[k] += (val - o[k]) * Math.min(1, dt * s); };
-    if (b.estado === 'mari') {
-      const ciclo = b.fase % 6; const acena = ciclo < 2.4;
-      const ang = Math.atan2(S.cam.position.x - b.base.x, S.cam.position.z - b.base.z);
-      R.rotation.y += (ang - R.rotation.y) * Math.min(1, dt * 3);
-      if (acena) { lerp(P.armR.rotation, 'z', 2.5 + Math.sin(b.fase * 9) * .35, 10); lerp(P.armR.rotation, 'x', 0); }
-      else { lerp(P.armR.rotation, 'z', .15); }
+    if (P.estrela) P.estrela.rotation.y = b.fase * 1.8;
+    if (b.mari && b.fase % 16 < 3.2) {
+      // Mari cumprimenta a turma de tempos em tempos (e depois volta às atividades)
+      if (b.propAtual) setProp(b, null);
+      const ang = Math.atan2(S.cam.position.x - (b.base.x + b.cur.x), S.cam.position.z - (b.base.z + b.cur.y));
+      R.rotation.y += (ang - R.rotation.y) * Math.min(1, dt * 4);
+      lerp(P.armR.rotation, 'z', 2.5 + Math.sin(b.fase * 9) * .35, 10); lerp(P.armR.rotation, 'x', 0, 10);
       lerp(P.armL.rotation, 'z', -.35); lerp(P.armL.rotation, 'x', -.2);
-      lerp(P.head.rotation, 'z', acena ? Math.sin(b.fase * 3) * .12 : 0, 4);
+      lerp(P.legL.rotation, 'x', 0); lerp(P.legR.rotation, 'x', 0);
+      lerp(P.head.rotation, 'z', Math.sin(b.fase * 3) * .12, 4); lerp(P.head.rotation, 'x', 0);
       y = Math.abs(Math.sin(b.fase * 2.2)) * .06;
-      P.estrela.rotation.y = b.fase * 1.8;
+      if (b.modo === 'acao') b.t = Math.min(b.t, .01); // ao terminar o aceno, segue para a próxima atividade
       b.extra.forEach((z, k) => { const a = b.fase * .9 + k * Math.PI / 2; z.position.set(Math.cos(a) * 1.25, 1.5 + Math.sin(b.fase * 1.6 + k) * .45, Math.sin(a) * 1.25); z.material.rotation = b.fase; });
     } else if (b.estado === 'aquecendo') {
       const f = Math.sin(b.fase * 7);
@@ -482,7 +525,7 @@ function loop() {
     if (b.estado !== 'dormindo') R.position.y = y;
     b.g.position.set(b.base.x + b.cur.x, 0, b.base.z + b.cur.y);
     // etiqueta
-    v.set(b.g.position.x, b.estado === 'dormindo' ? 1.45 : b.estado === 'mari' ? 3.35 : 2.75, b.g.position.z).project(S.cam);
+    v.set(b.g.position.x, b.estado === 'dormindo' ? 1.45 : b.mari ? 3.35 : 2.75, b.g.position.z).project(S.cam);
     const w = S.container.clientWidth, h = S.container.clientHeight;
     const vis = v.z < 1 && v.x > -1.1 && v.x < 1.1 && v.y > -1.1 && v.y < 1.1;
     b.label.style.display = vis ? '' : 'none';
@@ -492,7 +535,7 @@ function loop() {
       const perto = S.cam.position.distanceTo(S.ctl.target) < (S.distHome || 30) * .45 || b.label.classList.contains('foco');
       sp.style.display = perto ? '' : 'none';
       const bt = b.label.firstChild, nn = b.label.classList.contains('foco') ? b.label.dataset.full : b.label.dataset.curto; if (bt.textContent !== nn) bt.textContent = nn;
-      const txt = b.estado === 'mari' ? '✨ sua nutri' : b.estado === 'aquecendo' ? '🔥 aquecendo' : b.estado === 'dormindo' ? '😴 dormindo' : (b.modo === 'anda' ? '🚶‍♀️ indo…' : ACAO_IC[b.habs[b.idx]] + ' ' + ACAO_VERBO[b.habs[b.idx]]);
+      const txt = b.mari && b.fase % 16 < 3.2 ? '👋 oi, meninas!' : b.estado === 'aquecendo' ? '🔥 aquecendo' : b.estado === 'dormindo' ? '😴 dormindo' : (b.modo === 'anda' ? '🚶‍♀️ indo…' : ACAO_IC[b.habs[b.idx]] + ' ' + ACAO_VERBO[b.habs[b.idx]]);
       if (sp.textContent !== txt) sp.textContent = txt;
     }
   }
@@ -514,8 +557,10 @@ function focar(nome) {
   const b = S.bots.find(x => x.nome.toLowerCase().includes(q));
   if (!b) return false;
   b.label.classList.add('foco');
-  window.dispatchEvent(new CustomEvent('sala3d-foco', { detail: { nome: b.nome, estado: b.estado, habs: b.habs.slice() } }));
-  const t = new THREE.Vector3(b.base.x, 1, b.base.z);
+  window.dispatchEvent(new CustomEvent('sala3d-foco', { detail: { nome: b.nome, estado: b.estado, habs: b.habs.slice(), mari: !!b.mari } }));
+  // a ficha abre embaixo (à esquerda no PC): o robô fica na parte de cima da tela, sem ficar atrás dela
+  const larga = S.container.clientWidth > 700;
+  const t = new THREE.Vector3(b.base.x - (larga ? 1.6 : 0), 1, b.base.z + (larga ? 2.2 : 3.2));
   irPara(t, t.clone().add(new THREE.Vector3(3, 7.5, 9)));
   return true;
 }
