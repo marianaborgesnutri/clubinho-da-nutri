@@ -25,7 +25,7 @@
     grid-template-columns:1fr;grid-template-areas:"podio" "sala" "top" }
   .a-podio{grid-area:podio}.a-sala{grid-area:sala}.a-top{grid-area:top}.a-chat{grid-area:chat}
   @media (min-width:1000px){
-    .grade{grid-template-columns:330px minmax(0,1fr) 340px;grid-template-areas:"chat podio top" "chat sala top";align-items:start}
+    .grade{grid-template-columns:330px minmax(0,1fr) 360px;grid-template-areas:"chat podio top" "chat sala sala";align-items:start}
     .a-chat{position:sticky;top:12px}
   }
 
@@ -74,10 +74,26 @@
   @media (min-width:600px){.piso{grid-template-columns:repeat(auto-fill,minmax(112px,1fr))}.piso .bot .fig{width:94px}}
 
   /* sala 3D */
-  .sala3d{position:relative;margin-top:12px;height:72vh;min-height:440px;border-radius:20px;overflow:hidden;
+  .sala3d{position:relative;margin-top:12px;height:82vh;min-height:520px;border-radius:20px;overflow:hidden;
     background:linear-gradient(#F3ECE6,#E8DDD4);touch-action:none}
-  @media (min-width:1000px){.sala3d{height:calc(100vh - 150px);min-height:620px}}
+  @media (min-width:1000px){.sala3d{height:calc(100vh - 170px);min-height:600px}}
   @media (max-width:600px){.legenda span{font-size:10.5px;padding:3px 8px}.sala-topo .busca{width:100%;margin-left:0}.s3-dica{font-size:10px;right:10px;text-align:center}}
+  .vis-sala{display:flex;gap:6px;margin-top:12px;background:var(--creme);padding:5px;border-radius:99px;width:max-content;max-width:100%}
+  .vis-sala button{border:0;background:transparent;border-radius:99px;padding:8px 14px;font:inherit;font-size:13px;font-weight:700;color:var(--verde-esc);cursor:pointer;white-space:nowrap}
+  .vis-sala button i{font-style:normal;opacity:.7;font-weight:600}
+  .vis-sala button.on{background:var(--verde);color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+  .vis-sala button.on i{opacity:.9}
+  @media (max-width:600px){.vis-sala{width:100%}.vis-sala button{flex:1;padding:8px 4px;font-size:11.5px}}
+  .s3-vazio{position:absolute;inset:0;z-index:3;display:flex;align-items:center;justify-content:center;text-align:center;padding:30px;font-weight:700;font-size:16px;color:var(--verde-esc);background:rgba(243,236,230,.92)}
+  .s3-info{position:absolute;left:10px;bottom:10px;z-index:3;background:#fff;border-radius:18px;padding:12px 14px 12px;box-shadow:0 6px 20px rgba(0,0,0,.18);width:min(300px,calc(100% - 20px))}
+  .s3-info h3{margin:0 26px 2px 0;font-size:15px;color:var(--verde-esc)}
+  .s3-info .q{font-size:12px;color:var(--muted);margin-bottom:8px}
+  .s3-info ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  .s3-info li{border-radius:12px;padding:7px 9px;font-size:12.5px;font-weight:700;background:var(--cinza);color:var(--muted)}
+  .s3-info li.ok{background:#DDEDE2;color:#2F6A45}
+  .s3-info .tot{margin-top:8px;font-size:12.5px;font-weight:700;color:var(--verde-esc)}
+  .s3-info .x{position:absolute;right:8px;top:8px;border:0;background:var(--creme);width:28px;height:28px;border-radius:50%;font-size:15px;color:var(--verde-esc);cursor:pointer}
+  @media (max-width:600px){.s3-info{bottom:62px}}
   .sala3d canvas{display:block;width:100%!important;height:100%!important}
   .s3-labels{position:absolute;inset:0;pointer-events:none;overflow:hidden}
   .s3-nome{position:absolute;left:0;top:0;display:flex;flex-direction:column;align-items:center;gap:1px;white-space:nowrap;will-change:transform}
@@ -119,6 +135,13 @@
     .a-chat .chat-card{width:100%;height:calc(100% - 40px - env(safe-area-inset-top));border-radius:24px 24px 0 0;padding-bottom:env(safe-area-inset-bottom)}
   }
   @media (min-width:1000px){ .fab,.chat-cab .fechar{display:none} .a-chat.fechado{display:block} }
+  .chat-cab .tam{display:none;margin-left:auto;border:0;background:var(--creme);border-radius:99px;padding:7px 12px;font:inherit;font-size:12px;font-weight:700;color:var(--verde-esc);cursor:pointer}
+  @media (min-width:1000px){
+    .chat-cab .tam{display:inline-block}
+    body.chat-grande .grade{grid-template-columns:minmax(460px,40%) minmax(0,1fr) 350px}
+    body.chat-grande .chat-card{height:calc(100vh - 40px)}
+    body.chat-grande .msgs{font-size:15px}
+  }
   .lightbox{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:100;display:flex;align-items:center;justify-content:center;padding:16px}
   .lightbox img{max-width:100%;max-height:100%;border-radius:12px}
   .rodape{text-align:center;color:var(--muted);font-size:12px;padding:10px}
@@ -154,7 +177,14 @@
     <div class="legenda">
       <span>🥗 Alimentação</span><span>🏋️‍♀️ Exercício</span><span>💧 Água</span><span>🍎 Fruta</span><span>✨ Brilha mais quem fez mais</span><span>😴 Dormindo</span>
     </div>
+    <div class="vis-sala hidden" id="visSala">
+      <button data-v="ativas" class="on">🏃‍♀️ Em atividade <i id="nAtivas"></i></button>
+      <button data-v="dormindo">😴 Dormindo <i id="nDorm"></i></button>
+      <button data-v="todas">👥 Todas <i id="nTodas"></i></button>
+    </div>
     <div class="sala3d hidden" id="sala3d">
+      <div class="s3-vazio hidden" id="s3vazio"></div>
+      <div class="s3-info hidden" id="s3info"></div>
       <div class="s3-dica">👆 Arraste para girar · pinça para zoom · toque num robô</div>
       <button class="s3-home" id="s3home">⟲ Ver a sala toda</button>
     </div>
@@ -176,7 +206,7 @@
 
   <section class="a-chat fechado" id="chatWrap">
     <div class="card chat-card">
-      <div class="chat-cab"><h2>💬 Chat do Clubinho</h2><button class="fechar" id="fecharChat" aria-label="Fechar">×</button></div>
+      <div class="chat-cab"><h2>💬 Chat do Clubinho</h2><button class="tam" id="chatTam">⤢ Aumentar chat</button><button class="fechar" id="fecharChat" aria-label="Fechar">×</button></div>
       <div class="portao" id="portaoSenha">
         <div style="font-size:34px">🔒</div>
         <p>Digite a senha do Clubinho para entrar no chat</p>
@@ -206,10 +236,10 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.js"></script>
 <script src="logo.js"></script>
 <script src="config.js"></script>
-<script src="comum.js"></script>
-<script src="robo.js"></script>
+<script src="comum.js?v=4"></script>
+<script src="robo.js?v=4"></script>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
-<script type="module" src="sala3d.js"></script>
+<script type="module" src="sala3d.js?v=6"></script>
 <script>
 (function(){
   const C = CLUBE, sb = C.sb, el = C.el;
@@ -311,6 +341,56 @@
   }
 
   let s3ok = false, s3chave = '';
+  // chat maior no computador
+  (function () {
+    const bt = document.getElementById('chatTam');
+    const aplicar = g => { document.body.classList.toggle('chat-grande', g); bt.textContent = g ? '⤡ Diminuir chat' : '⤢ Aumentar chat'; };
+    let g = false; try { g = localStorage.getItem('clube_chat_grande') === '1'; } catch (e) {}
+    aplicar(g);
+    bt.onclick = () => { g = !g; aplicar(g); try { localStorage.setItem('clube_chat_grande', g ? '1' : '0'); } catch (e) {} };
+  })();
+  // ficha do robô ao tocar
+  const NOMES_HAB = { alimentacao: '🥗 Alimentação', exercicio: '🏋️‍♀️ Exercício', agua: '💧 Água', fruta: '🍎 Fruta' };
+  window.addEventListener('sala3d-foco', e => {
+    const box = document.getElementById('s3info'); const d = e.detail;
+    if (!d) { box.classList.add('hidden'); return; }
+    const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    let corpo;
+    if (d.estado === 'aquecendo') corpo = '<div class="q">Se aquecendo para a largada 🔥</div>';
+    else {
+      const quando = painel && painel.ref ? C.semana(painel.ref) + ', ' + C.ddmm(painel.ref) : 'ontem';
+      corpo = '<div class="q">O que fez em ' + esc(quando) + '</div><ul>' +
+        Object.keys(NOMES_HAB).map(h => '<li class="' + (d.habs.includes(h) ? 'ok' : '') + '">' + NOMES_HAB[h] + (d.habs.includes(h) ? ' ✓' : '') + '</li>').join('') + '</ul>' +
+        '<div class="tot">' + (d.habs.length ? d.habs.length + ' de 4 hábitos ' + (d.habs.length === 4 ? '🌟' : '💪') : 'Não registrou nada nesse dia 😴') + '</div>';
+    }
+    box.innerHTML = '<button class="x" aria-label="Fechar">×</button><h3>' + esc(d.nome) + '</h3>' + corpo;
+    box.querySelector('.x').onclick = () => { document.getElementById('busca').value = ''; Sala3D.inicio(); };
+    box.classList.remove('hidden');
+  });
+  let visao = 'ativas';
+  function listaSala() {
+    if (!painel) return [];
+    if (!painel.ref) return painel.sala;
+    const fez = s => (s.hab || []).length > 0;
+    if (visao === 'ativas') return painel.sala.filter(fez);
+    if (visao === 'dormindo') return painel.sala.filter(s => !fez(s));
+    return painel.sala;
+  }
+  function contarVisao() {
+    const vs = document.getElementById('visSala');
+    if (!painel || !painel.ref) { vs.classList.add('hidden'); return; }
+    vs.classList.remove('hidden');
+    const at = painel.sala.filter(s => (s.hab || []).length > 0).length;
+    document.getElementById('nAtivas').textContent = '(' + at + ')';
+    document.getElementById('nDorm').textContent = '(' + (painel.sala.length - at) + ')';
+    document.getElementById('nTodas').textContent = '(' + painel.sala.length + ')';
+    vs.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.v === visao));
+  }
+  function mudarVisao(v) {
+    visao = v; contarVisao(); document.getElementById('busca').value = ''; document.getElementById('s3info').classList.add('hidden');
+    filtrarSala();
+  }
+  document.querySelectorAll('#visSala button').forEach(b => b.onclick = () => mudarVisao(b.dataset.v));
   function sala3d() {
     if (!window.Sala3D || !Sala3D.pronto) return false;
     if (!s3ok) {
@@ -320,8 +400,12 @@
       if (!s3ok) { document.getElementById('sala3d').classList.add('hidden'); document.getElementById('sala2d').classList.remove('hidden'); return false; }
     }
     if (painel) {
-      const ch = JSON.stringify([painel.ref, painel.sala]);
-      if (ch !== s3chave) { s3chave = ch; Sala3D.atualizar(painel.sala, !painel.ref); }
+      const lista = listaSala();
+      const ch = JSON.stringify([painel.ref, visao, lista]);
+      if (ch !== s3chave) { s3chave = ch; Sala3D.atualizar(lista, !painel.ref); }
+      const vz = document.getElementById('s3vazio');
+      vz.textContent = visao === 'dormindo' ? 'Ninguém dormiu ontem! Todo mundo fez pelo menos uma atividade 🎉' : 'Ninguém registrou atividade ontem ainda 😴';
+      vz.classList.toggle('hidden', lista.length > 0);
     }
     return true;
   }
@@ -329,10 +413,13 @@
   document.getElementById('s3home').onclick = () => { document.getElementById('busca').value = ''; window.Sala3D && Sala3D.inicio(); };
   function filtrarSala() {
     if (!painel) return;
+    contarVisao();
+    const qq = document.getElementById('busca').value.trim().toLowerCase();
+    if (qq.length >= 2 && visao !== 'todas' && painel.ref && !listaSala().some(s => s.nome.toLowerCase().includes(qq)) && painel.sala.some(s => s.nome.toLowerCase().includes(qq))) { visao = 'todas'; contarVisao(); }
     if (sala3d()) { const q = document.getElementById('busca').value.trim(); if (q.length >= 2) { if (!Sala3D.focar(q)) C.toast('Não achei esse nome'); } return; }
     const q = document.getElementById('busca').value.trim().toLowerCase();
     const piso = document.getElementById('piso'); piso.replaceChildren();
-    painel.sala.filter(s => !q || s.nome.toLowerCase().includes(q)).forEach(s => {
+    listaSala().filter(s => !q || s.nome.toLowerCase().includes(q)).forEach(s => {
       const habs = s.hab || [];
       const estado = !painel.ref ? 'aquecendo' : habs.length ? 'ativo' : 'dormindo';
       piso.append(bot(s.robo, estado, habs, s.nome));
