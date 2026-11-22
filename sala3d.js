@@ -441,10 +441,11 @@ function focar(nome) {
   if (!S.ok) return false;
   const q = (nome || '').trim().toLowerCase();
   S.bots.forEach(b => b.label.classList.remove('foco'));
-  if (!q) { if (S.home) irPara(S.home.target.clone(), S.home.pos.clone()); return true; }
+  if (!q) { window.dispatchEvent(new CustomEvent('sala3d-foco', { detail: null })); if (S.home) irPara(S.home.target.clone(), S.home.pos.clone()); return true; }
   const b = S.bots.find(x => x.nome.toLowerCase().includes(q));
   if (!b) return false;
   b.label.classList.add('foco');
+  window.dispatchEvent(new CustomEvent('sala3d-foco', { detail: { nome: b.nome, estado: b.estado, habs: b.habs.slice() } }));
   const t = new THREE.Vector3(b.base.x, 1, b.base.z);
   irPara(t, t.clone().add(new THREE.Vector3(3, 7.5, 9)));
   return true;
