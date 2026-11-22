@@ -262,7 +262,7 @@
 <script src="comum.js?v=4"></script>
 <script src="robo.js?v=4"></script>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
-<script type="module" src="sala3d.js?v=8"></script>
+<script type="module" src="sala3d.js?v=9"></script>
 <script>
 (function(){
   const C = CLUBE, sb = C.sb, el = C.el;
@@ -379,7 +379,7 @@
     if (!d) { box.classList.add('hidden'); return; }
     const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
     let corpo;
-    if (d.estado === 'mari') corpo = '<div class="q">A nutri do Clubinho ✨</div><div class="tot" style="font-weight:600">Tô acompanhando cada uma de vocês de pertinho! Qualquer dúvida, me chama no privado 💚</div>';
+    if (d.mari) corpo = '<div class="q">A nutri do Clubinho ✨ Faço tudo todo dia junto com vocês!</div><ul>' + Object.keys(NOMES_HAB).map(h => '<li class="ok">' + NOMES_HAB[h] + ' ✓</li>').join('') + '</ul><div class="tot" style="font-weight:600">Tô acompanhando cada uma de vocês de pertinho! Qualquer dúvida, me chama no privado 💚</div>';
     else if (d.estado === 'aquecendo') corpo = '<div class="q">Se aquecendo para a largada 🔥</div>';
     else {
       const quando = painel && painel.ref ? C.semana(painel.ref) + ', ' + C.ddmm(painel.ref) : 'ontem';
